@@ -1,0 +1,21 @@
+server:
+  port: 8080
+  host: 0.0.0.0
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: backend-service
+          uri: http://localhost:5000
+          predicates:
+            - Path=/api/v1/**
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: DEBUG
+  file:
+    name: logs/api-gateway.log

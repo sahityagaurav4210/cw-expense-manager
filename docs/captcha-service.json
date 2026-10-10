@@ -1,0 +1,729 @@
+{
+    "openapi": "3.0.0",
+    "paths": {
+        "/": {
+            "get": {
+                "description": "Retrieve application information including version and copyright details. Click the **Try it out** button to view the actual response.",
+                "operationId": "HomeController_getAppInfo",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Returns the application information such as version, copyright, and other metadata.",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "Captcha Service v0.0.1 © 2025 Gaurav Sahitya. All rights reserved."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Returns an internal server error response when the application information cannot be retrieved due to unexpected issues.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "exception"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation failed"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Internal Server Error"
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Get Application Info",
+                "tags": [
+                    "Home Controller"
+                ]
+            }
+        },
+        "/api/v1/app/ping": {
+            "get": {
+                "description": "Check the operational status of the service. Click the **Try it out** button to view the actual response.",
+                "operationId": "AppController_ping",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Returns a simple 'pong' message to indicate that the service is operational.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api is operational"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "pong"
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Returns an internal server error response when the API operation fails due to unexpected issues.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "exception"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation failed"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Internal Server Error"
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Ping API",
+                "tags": [
+                    "App Controller"
+                ]
+            }
+        },
+        "/api/v1/captcha/generate": {
+            "get": {
+                "description": "This api generates the captcha on the fly and returns the relative uri of generated captcha and its captcha id. Click the **Try it out** button to view the actual response.",
+                "operationId": "CaptchaController_handleGenerateCaptchaReq",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "It signifies a successful response from the server and returns the newly generated **captcha uri** and its **captcha id**. Please note that in production a code will come as a value to message property, please refer official documentation for interpretation of all codes.",
+                        "content": {
+                            "image/png": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation was successful"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Captcha generated successfully"
+                                                },
+                                                "details": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "captchaUri": {
+                                                            "type": "string",
+                                                            "example": "/captcha/1234567890"
+                                                        },
+                                                        "captchaId": {
+                                                            "type": "string",
+                                                            "example": 1234567890
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "It signifies an error response from the server (usually a 500 status code). It usually occurs when there has something bad happened at server side's code.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation has failed"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Something bad has happened."
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Generates a new captcha when requested",
+                "tags": [
+                    "Captcha Controller"
+                ]
+            }
+        },
+        "/api/v1/captcha/image/{captchaId}": {
+            "get": {
+                "description": "This api returns the captcha image as its response of the requested captcha id. Click the **Try it out** button to view its actual response. Please note that image will only be returned in case of successful image retrieval.",
+                "operationId": "CaptchaController_handleGetCaptchaImgReq",
+                "parameters": [
+                    {
+                        "name": "captchaId",
+                        "required": true,
+                        "in": "path",
+                        "description": "Please specify the captcha id which has been given to you by captcha generate api.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "It signifies a successful response from the server and returns a captcha image of the specified captcha id.",
+                        "content": {
+                            "image/png": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "It signifies a 'bad request' response from the server. This api usually gives this type of response when either the specified **CaptchaId** is invalid or it has been expired.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "validation"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation has failed"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Bad request"
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "It signifies an error response from the server (usually a 500 status code). It usually occurs when there has something bad happened at server side's code.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation has failed"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Something bad has happened."
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Returns the captcha image of the requested captcha id.",
+                "tags": [
+                    "Captcha Controller"
+                ]
+            }
+        },
+        "/api/v1/captcha/audio/{captchaId}": {
+            "get": {
+                "description": "This api returns the captcha audio as its response of the requested captcha id. Click the **Try it out** button to view its actual response. Please note that audio file will only be returned in case of successful audio retrieval.",
+                "operationId": "CaptchaController_handleGetCaptchaAudioReq",
+                "parameters": [
+                    {
+                        "name": "captchaId",
+                        "required": true,
+                        "in": "path",
+                        "description": "Please specify the captcha id which has been given to you by captcha generate api.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "It signifies a successful response from the server and returns a captcha audio of the specified captcha id.",
+                        "content": {
+                            "audio/mpeg": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Please specify the captcha id which has been given to you by captcha generate api.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "validation"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation has failed"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Bad request"
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "It signifies an error response from the server (usually a 500 status code). It usually occurs when there has something bad happened at server side's code.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation has failed"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Something bad has happened."
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Returns the captcha audio of the requested captcha id.",
+                "tags": [
+                    "Captcha Controller"
+                ]
+            }
+        },
+        "/api/v1/captcha/validate": {
+            "post": {
+                "description": "This api validates the given captcha and captcha id against the stored captcha details and returns the verification status according to it. Click the **Try it out** button to view its actual response.",
+                "operationId": "CaptchaController_handleValidateCaptchaReq",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CaptchaValidateRequestDTO"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "It signifies a successful response from the server and returns a verified captcha verification status in its response body.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation was successful"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Captcha validated successfully"
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "It signifies a bad request (a 400 status code) response from the server. This api usually returns this type of response when either the given **captchaId** is incorrect or it has been expired.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "validation"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation has failed"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Bad request"
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "It signifies an error response from the server (usually a 500 status code). It usually occurs when there has something bad happened at server side's code.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation has failed"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Something bad has happened."
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Validates the given captcha and captcha id.",
+                "tags": [
+                    "Captcha Controller"
+                ]
+            }
+        },
+        "/api/v1/captcha/status/{captchaId}": {
+            "get": {
+                "description": "This api returns the captcha verification status of the given **captchaId**. Click on **Try it out** button to view its actual response.",
+                "operationId": "CaptchaController_handleGetCaptchaVerificationStatus",
+                "parameters": [
+                    {
+                        "name": "captchaId",
+                        "required": true,
+                        "in": "path",
+                        "description": "Please specify the captcha id which has been given to you by captcha generate api.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "It signifies a successful response from the server and a captcha verification status in its response body.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation was successful"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Captcha verified successfully"
+                                                },
+                                                "details": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "verified": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "It signifies a bad request (a 400 status code) response from the server. This api usually returns this type of response when either the given **captchaId** is incorrect or it has been expired.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "validation"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation has failed"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Bad request"
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "It signifies an error response from the server (usually a 500 status code). It usually occurs when there has something bad happened at server side's code.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Api operation has failed"
+                                        },
+                                        "details": {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Something bad has happened."
+                                                }
+                                            }
+                                        },
+                                        "clientInfo": {
+                                            "type": "string",
+                                            "example": "127.0.0.1"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Returns the captcha verification status of the given captcha id.",
+                "tags": [
+                    "Captcha Controller"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "Captcha Service Backend",
+        "description": "**INTRODUCTION:** \u003Cbr/\u003E\u003Cbr/\u003E A CAPTCHA `(Completely Automated Public Turing test to tell Computers and Humans Apart)` service is a security tool designed to distinguish between human users and automated bots. By presenting challenges that are easy for people but difficult for machines—such as identifying distorted text, selecting specific objects in images, or simple interaction patterns—these services protect websites from spam, brute-force attacks, and data scraping. This service aims to provide such services to enhance the security and integrity of my **personal** and professional **web applications.** This project is backed by a **proprietary license** which you can see by clicking on the **LICENSE** link provided below. \u003Cbr/\u003E\u003Cbr/\u003E **ABOUT DEVELOPER:** \u003Cbr/\u003E\u003Cbr/\u003E This project is developed, maintained, and designed by me i.e., Gaurav Sahitya. I am a software engineer with more than **3** years of experience developing software systems. I am currently working at **C-DAC** (an autonomous scientific society under the Ministry of Electronics and Information Technology, Government of India) in Delhi, India. For more information please click on the **WEBSITE** link provided below.",
+        "version": "0.0.1",
+        "contact": {
+            "name": "Gaurav Sahitya",
+            "url": "https://www.sgaurav.me",
+            "email": "works.sahitya@gmail.com"
+        },
+        "license": {
+            "name": "PROPRIETARY LICENSE",
+            "url": "./LICENSE.txt"
+        }
+    },
+    "tags": [],
+    "servers": [
+        {
+            "url": "http://localhost:11905",
+            "description": "Local Development Server"
+        }
+    ],
+    "components": {
+        "schemas": {
+            "CaptchaValidateRequestDTO": {
+                "type": "object",
+                "properties": {
+                    "captcha": {
+                        "type": "string",
+                        "description": "Captcha entered by the user",
+                        "maxLength": 8
+                    },
+                    "captchaId": {
+                        "type": "string",
+                        "description": "Captcha Id given by the captcha generate api."
+                    }
+                },
+                "required": [
+                    "captcha",
+                    "captchaId"
+                ]
+            }
+        }
+    }
+}
