@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class ApiGatewayApplication {
-
     private static final Logger logger = LoggerFactory.getLogger(ApiGatewayApplication.class);
 
     public static void main(String[] args) {

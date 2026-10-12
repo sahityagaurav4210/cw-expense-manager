@@ -75,14 +75,15 @@ export const expenseSchema = Joi.object({
         "Expense name can contain only letters and numbers.",
     }),
   amount: Joi.number().positive().invalid(NaN).required(),
-  category_id: Joi.number().integer().allow(null, ""),
+  category_id: Joi.alternatives().try(Joi.number().integer(), Joi.string().allow("", null)).optional(),
   type: Joi.string().valid("Fixed", "Variable").required(),
   expense_date: Joi.string()
     .pattern(/^\d{4}-\d{2}-\d{2}$/)
     .allow("", null),
   captchaText: Joi.string().required(),
-  captchaId: Joi.number().allow("", null).optional(),
-});
+  captchaId: Joi.alternatives().try(Joi.number(), Joi.string()).allow("", null).optional(),
+}).unknown(true);
+
 
 export const updateProfileSchema = Joi.object({
   name: Joi.string()

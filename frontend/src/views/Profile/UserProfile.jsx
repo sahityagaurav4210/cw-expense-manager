@@ -21,8 +21,16 @@ import CaptchaComponent from "../../components/core/CaptchaComponent";
 import ConfirmationDialog from "../../components/core/ConfirmationDialog";
 import useAppCss from "../../hooks/css/useAppCss";
 
+export const resolvePhotoUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  const clean = url.startsWith("/") ? url : `/${url}`;
+  return `http://localhost:5000${clean}`;
+};
+
 const UserProfile = () => {
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
   const { showAlert } = useUI();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -30,15 +38,17 @@ const UserProfile = () => {
   const { GlobalPaperCss } = useAppCss();
 
   const [formData, setFormData] = useState({
-    name: "",
-    phone_no: "",
-    employment_type: "Salaried",
+    name: user?.name || "",
+    phone_no: user?.phone_no || "",
+    employment_type: user?.employment_type || "Salaried",
     captchaText: "",
   });
   const [captchaId, setCaptchaId] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(user?.email || "");
   const [profilePhoto, setProfilePhoto] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(
+    resolvePhotoUrl(user?.profile_photo || user?.profile_photo_url)
+  );
 
   const [confirmDialog, setConfirmDialog] = useState(false);
 
@@ -47,12 +57,28 @@ const UserProfile = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (user && !profilePhoto) {
+      const photo = user.profile_photo || user.profile_photo_url;
+      if (photo) {
+        setPhotoPreview(resolvePhotoUrl(photo));
+      }
+      setFormData((prev) => ({
+        ...prev,
+        name: user.name || prev.name,
+        phone_no: user.phone_no || prev.phone_no,
+        employment_type: user.employment_type || prev.employment_type,
+      }));
+      if (user.email) setEmail(user.email);
+    }
+  }, [user, profilePhoto]);
+
   const fetchProfile = async () => {
     setLoading(true);
     try {
       const res = await getProfileApi();
 
-      if (res.status === "success") {
+      if (res.status === "success" && res.data) {
         setFormData({
           name: res.data.name || "",
           phone_no: res.data.phone_no || "",
@@ -60,10 +86,11 @@ const UserProfile = () => {
           captchaText: "",
         });
         setEmail(res.data.email || "");
-        if (res.data.profile_photo_url) {
-          setPhotoPreview(`http://localhost:5000${res.data.profile_photo_url}`);
+        const photo = res.data.profile_photo || res.data.profile_photo_url;
+        if (photo) {
+          setPhotoPreview(resolvePhotoUrl(photo));
         }
-        dispatch(setAuth(res.data)); // Sync Redux state with latest profile
+        dispatch(setAuth({ user: res.data })); // Sync Redux state with latest profile
       }
     } catch (error) {
       showAlert(
@@ -115,7 +142,11 @@ const UserProfile = () => {
       const res = await updateProfileApi(data);
       if (res.status === "success") {
         showAlert("Profile updated successfully", "success");
-        dispatch(setAuth(res.data));
+        dispatch(setAuth({ user: res.data }));
+        const photo = res.data?.profile_photo || res.data?.profile_photo_url;
+        if (photo) {
+          setPhotoPreview(resolvePhotoUrl(photo));
+        }
         setFormData((prev) => ({ ...prev, captchaText: "" }));
       }
     } catch (error) {
@@ -160,7 +191,7 @@ const UserProfile = () => {
           <Box display="flex" justifyContent="center" mb={2}>
             <Box position="relative">
               <Avatar
-                src={photoPreview}
+                src={photoPreview || undefined}
                 sx={{
                   width: 100,
                   height: 100,

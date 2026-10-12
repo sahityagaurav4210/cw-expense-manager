@@ -28,7 +28,9 @@ import dayjs from "dayjs";
 import { useDashboard } from "../../hooks/useDashboard";
 import PDFViewer from "../../components/core/PDFViewer";
 import PaperComponent from "../../components/core/PaperComponent";
+import AppDialogTitle from "../../components/core/AppDialogTitle";
 import useAppCss from "../../hooks/css/useAppCss";
+import TopDownAnimation from "../../components/animation/TopDownAnimation";
 
 const UserDashboard = () => {
   const theme = useTheme();
@@ -210,14 +212,16 @@ const UserDashboard = () => {
                   >
                     Allocated Monthly Income
                   </Typography>
-                  <Typography
-                    variant="h4"
-                    fontWeight={700}
-                    color="primary.main"
-                    mt={0.5}
-                  >
-                    ₹{monthlyIncome.toLocaleString("en-IN")}
-                  </Typography>
+                  <TopDownAnimation trigger={monthlyIncome} delay={0.05}>
+                    <Typography
+                      variant="h4"
+                      fontWeight={700}
+                      color="primary.main"
+                      mt={0.5}
+                    >
+                      ₹{monthlyIncome.toLocaleString("en-IN")}
+                    </Typography>
+                  </TopDownAnimation>
                 </Box>
                 <AccountBalanceWalletIcon color="info" sx={{ fontSize: 40 }} />
               </Box>
@@ -245,14 +249,16 @@ const UserDashboard = () => {
                   >
                     Total Incurred Expense
                   </Typography>
-                  <Typography
-                    variant="h4"
-                    fontWeight={700}
-                    color="error.main"
-                    mt={0.5}
-                  >
-                    ₹{totalExpense.toLocaleString("en-IN")}
-                  </Typography>
+                  <TopDownAnimation trigger={totalExpense} delay={0.15}>
+                    <Typography
+                      variant="h4"
+                      fontWeight={700}
+                      color="error.main"
+                      mt={0.5}
+                    >
+                      ₹{totalExpense.toLocaleString("en-IN")}
+                    </Typography>
+                  </TopDownAnimation>
                 </Box>
                 <ShoppingCartIcon color="error" sx={{ fontSize: 40 }} />
               </Box>
@@ -280,14 +286,16 @@ const UserDashboard = () => {
                   >
                     Amount of Money Left
                   </Typography>
-                  <Typography
-                    variant="h4"
-                    fontWeight={700}
-                    color="success.main"
-                    mt={0.5}
-                  >
-                    ₹{moneyLeft.toLocaleString("en-IN")}
-                  </Typography>
+                  <TopDownAnimation trigger={moneyLeft} delay={0.25}>
+                    <Typography
+                      variant="h4"
+                      fontWeight={700}
+                      color="success.main"
+                      mt={0.5}
+                    >
+                      ₹{moneyLeft.toLocaleString("en-IN")}
+                    </Typography>
+                  </TopDownAnimation>
                 </Box>
                 <SavingsIcon color="success" sx={{ fontSize: 40 }} />
               </Box>
@@ -392,9 +400,11 @@ const UserDashboard = () => {
         fullWidth
         PaperComponent={PaperComponent}
       >
-        <DialogTitle sx={{ fontWeight: 700, color: "primary.main" }}>
-          Monthly Financial Report Preview
-        </DialogTitle>
+        <AppDialogTitle
+          title="Monthly Financial Report Preview"
+          onClose={handleClosePdfModal}
+          Icon={<PictureAsPdfIcon sx={{ color: "white" }} />}
+        />
         <DialogContent dividers>
           <PDFViewer
             pdfData={new Blob([htmlReport], { type: "text/html" })}

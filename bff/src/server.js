@@ -25,7 +25,11 @@ const limiter = rateLimit({
 app.use(helmet());
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"],
+    origin: [
+      "http://localhost:9123",
+      "http://localhost:3000",
+      "http://localhost:3001",
+    ],
     credentials: true,
   }),
 );
@@ -45,6 +49,7 @@ app.get("/health", (req, res) => {
 
 // Proxy all API requests to API Gateway / Backend
 app.use("/api/v1", ProxyController.forwardRequest);
+app.use("/uploads", ProxyController.forwardRequest);
 
 app.listen(PORT, SERVER_HOST, () => {
   logger.info(`Backend for Frontend (BFF) running on port ${PORT}`);

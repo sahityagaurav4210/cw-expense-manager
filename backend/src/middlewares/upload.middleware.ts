@@ -35,3 +35,21 @@ export const uploadProfilePhoto = multer({
     fileSize: 1 * 1024 * 1024, // 1MB limit
   },
 });
+
+const billFileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
+  if (allowedTypes.includes(file.mimetype.toLowerCase())) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only *.jpg, *.jpeg, *.png, and *.pdf files are allowed for bills."));
+  }
+};
+
+export const uploadBill = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: billFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+});
+

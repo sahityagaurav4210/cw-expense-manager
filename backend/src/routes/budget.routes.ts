@@ -6,5 +6,6 @@ const router = Router();
 
 router.post("/", authMiddleware, BudgetController.setBudget);
 router.get("/", authMiddleware, BudgetController.getBudgets);
+router.post("/:id/inflow", authMiddleware, BudgetController.addInflow);
 
 export default router;

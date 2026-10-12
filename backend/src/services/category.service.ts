@@ -3,7 +3,7 @@ import { redisClient } from "../config/redis.config";
 import { CaptchaValidationService } from "./captchaValidation.service";
 import { logger } from "../config/logger.config";
 
-const REDIS_CATEGORY_KEY = "categories:master";
+const REDIS_CATEGORY_KEY = "categories:master:v2";
 
 export class CategoryService {
   public static async getAllCategories() {
@@ -19,7 +19,7 @@ export class CategoryService {
 
     const categories = await Category.findAll({
       where: { delete_flag: false },
-      order: [["name", "ASC"]],
+      order: [["id", "DESC"]],
     });
 
     try {

@@ -40,8 +40,19 @@ const Register = () => {
   } = useRegister();
 
   return (
-    <Container maxWidth="sm" sx={{ py: 4 }}>
-      <Paper elevation={4} sx={{ p: 4, borderRadius: 3 }}>
+    <Box
+      sx={{
+        width: "100%",
+        minHeight: "calc(100vh - 80px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        py: { xs: 3, sm: 5 },
+        px: { xs: 2, sm: 3 },
+      }}
+    >
+      <Container maxWidth="sm" sx={{ p: "0 !important" }}>
+        <Paper elevation={4} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 3, width: "100%" }}>
         <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
           <Box
             sx={{
@@ -240,6 +251,7 @@ const Register = () => {
         </Box>
       </Paper>
     </Container>
+  </Box>
   );
 };
 

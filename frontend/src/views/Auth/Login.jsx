@@ -25,8 +25,19 @@ const Login = () => {
   const { formData, setCaptchaId, errors, loading, handleChange, handleSubmit } = useLogin();
 
   return (
-    <Container maxWidth="xs" sx={{ py: 6 }}>
-      <Paper elevation={4} sx={{ p: 4, borderRadius: 3 }}>
+    <Box
+      sx={{
+        width: "100%",
+        minHeight: "calc(100vh - 80px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        py: { xs: 4, sm: 6 },
+        px: { xs: 2, sm: 3 },
+      }}
+    >
+      <Container maxWidth="xs" sx={{ p: "0 !important" }}>
+        <Paper elevation={4} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 3, width: "100%" }}>
         <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
           <Box
             sx={{
@@ -137,6 +148,7 @@ const Login = () => {
         </Box>
       </Paper>
     </Container>
+  </Box>
   );
 };
 

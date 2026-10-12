@@ -22,10 +22,15 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import { useExpense } from "../../hooks/useExpense";
-import { useExpenseColumns } from "../../hooks/mrt/useExpenseColumns";
+import {
+  useExpenseColumns,
+  expenseDefaultSorting,
+} from "../../hooks/mrt/useExpenseColumns";
 import ConfirmationDialog from "../../components/core/ConfirmationDialog";
 import CaptchaComponent from "../../components/core/CaptchaComponent";
 import PaperComponent from "../../components/core/PaperComponent";
+import FileUploaderV2 from "../../components/core/FileUploaderV2";
+import AppDialogTitle from "../../components/core/AppDialogTitle";
 import useAppCss from "../../hooks/css/useAppCss";
 
 const ExpenseManager = () => {
@@ -36,6 +41,9 @@ const ExpenseManager = () => {
     loading,
     modalOpen,
     formData,
+    billFile,
+    setBillFile,
+    setIsBillReady,
     setCaptchaId,
     errors,
     confirmDialog,
@@ -45,15 +53,20 @@ const ExpenseManager = () => {
     requestCreateConfirmation,
     requestDeleteConfirmation,
     executeConfirmedAction,
+    fetchData,
   } = useExpense();
 
   const columns = useExpenseColumns({
     onDelete: requestDeleteConfirmation,
+    onBillUploaded: fetchData,
   });
 
   const table = useMaterialReactTable({
     columns,
     data: expenses,
+    initialState: {
+      sorting: expenseDefaultSorting,
+    },
     state: { isLoading: loading },
     enableColumnActions: true,
     enableColumnFilters: true,
@@ -119,9 +132,11 @@ const ExpenseManager = () => {
           fullWidth
           PaperComponent={PaperComponent}
         >
-          <DialogTitle sx={{ fontWeight: 700, color: "primary.main" }}>
-            Record Expense Item
-          </DialogTitle>
+          <AppDialogTitle
+            title="Record Expense Item"
+            onClose={handleCloseModal}
+            Icon={<ReceiptLongIcon sx={{ color: "white" }} />}
+          />
           <Box component="form" onSubmit={requestCreateConfirmation}>
             <DialogContent dividers>
               <Box display="flex" flexDirection="column" gap={2}>
@@ -208,6 +223,34 @@ const ExpenseManager = () => {
                     textField: { fullWidth: true, size: "small" },
                   }}
                 />
+
+                {/* Bill / Receipt Upload using FileUploaderV2 */}
+                <Box>
+                  <Typography variant="body2" fontWeight={600} color="primary" mb={1}>
+                    Attach Bill / Receipt (Optional - PDF, JPG, PNG up to 5MB)
+                  </Typography>
+                  <FileUploaderV2
+                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                    maxSizeMB={5}
+                    label="Drag & drop bill or click to browse"
+                    onFileChange={(file) => setBillFile(file)}
+                    onReadyChange={(ready) => setIsBillReady(ready)}
+                  />
+                  {billFile && (
+                    <Box display="flex" justifyContent="flex-end" mt={0.5}>
+                      <Button
+                        size="small"
+                        color="error"
+                        onClick={() => {
+                          setBillFile(null);
+                          setIsBillReady(true);
+                        }}
+                      >
+                        Clear Attached File
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
 
                 {/* CAPTCHA */}
                 <CaptchaComponent

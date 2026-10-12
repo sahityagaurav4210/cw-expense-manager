@@ -5,6 +5,7 @@ import { uploadProfilePhoto } from "../middlewares/upload.middleware";
 
 const router = Router();
 
+router.get("/get-me", UserController.getMe);
 router.get("/profile", authMiddleware, UserController.getProfile);
 router.put("/profile", authMiddleware, uploadProfilePhoto.single("profile_photo"), UserController.updateProfile);
 

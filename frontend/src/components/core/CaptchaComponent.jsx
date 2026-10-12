@@ -31,6 +31,8 @@ const CaptchaComponent = ({
   const [loading, setLoading] = useState(false);
   const [fallbackCode, setFallbackCode] = useState("");
   const canvasRef = useRef(null);
+  const wrapperRef = useRef(null);
+  const isFetchingRef = useRef(false);
 
   const drawFallbackCaptcha = (code) => {
     const canvas = canvasRef.current;
@@ -67,6 +69,8 @@ const CaptchaComponent = ({
   };
 
   const generateCaptcha = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
     setLoading(true);
     try {
       const res = await fetch(`${CAPTCHA_SERVICE_URL}/api/v1/captcha/generate`);
@@ -86,7 +90,7 @@ const CaptchaComponent = ({
     } catch {
       // Offline fallback
       const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-      const cid = `fallback_${Date.now()}`;
+      const cid = `fallback_${btoa(code)}_${Date.now()}`;
       setFallbackCode(code);
       setCaptchaId(cid);
       if (onCaptchaIdChange) onCaptchaIdChange(cid);
@@ -94,6 +98,7 @@ const CaptchaComponent = ({
       setTimeout(() => drawFallbackCaptcha(code), 50);
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
   }, [onCaptchaIdChange]);
 
@@ -104,6 +109,17 @@ const CaptchaComponent = ({
   // Listen to global API error event to auto-reload CAPTCHA and reset text
   useEffect(() => {
     const handleApiError = () => {
+      if (disabled) return;
+
+      // If an active modal is displayed on screen, background page CAPTCHAs should not reload
+      if (wrapperRef.current) {
+        const closestDialog = wrapperRef.current.closest('[role="dialog"]');
+        const activeModal = document.querySelector('[role="dialog"]');
+        if (activeModal && !closestDialog) {
+          return;
+        }
+      }
+
       generateCaptcha();
       if (onChange) {
         onChange({ target: { value: "" } });
@@ -116,7 +132,7 @@ const CaptchaComponent = ({
         window.removeEventListener("cw-api-error", handleApiError);
       };
     }
-  }, [generateCaptcha, onChange]);
+  }, [disabled, generateCaptcha, onChange]);
 
   const handleAudioPlay = () => {
     if (captchaId && imageUrl) {
@@ -133,7 +149,7 @@ const CaptchaComponent = ({
   };
 
   return (
-    <Box display="flex" flexDirection="column" gap={1} width="100%">
+    <Box ref={wrapperRef} display="flex" flexDirection="column" gap={1} width="100%">
       <Box display="flex" alignItems="center" gap={1.5}>
         <Box
           sx={{

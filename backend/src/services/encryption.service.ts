@@ -34,4 +34,29 @@ export class EncryptionService {
     decrypted += decipher.final("utf8");
     return decrypted;
   }
+
+  /**
+   * Encrypts a binary buffer using AES-256-CBC.
+   * Output structure: [16 bytes IV][encrypted bytes]
+   */
+  public static encryptBuffer(buffer: Buffer): Buffer {
+    const iv = crypto.randomBytes(IV_LENGTH);
+    const key = crypto.scryptSync(ENCRYPTION_KEY, "salt", 32);
+    const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
+    const encrypted = Buffer.concat([cipher.update(buffer), cipher.final()]);
+    return Buffer.concat([iv, encrypted]);
+  }
+
+  /**
+   * Decrypts an AES-256-CBC encrypted binary buffer.
+   * Input structure: [16 bytes IV][encrypted bytes]
+   */
+  public static decryptBuffer(buffer: Buffer): Buffer {
+    if (buffer.length < IV_LENGTH) return buffer;
+    const iv = buffer.subarray(0, IV_LENGTH);
+    const encryptedData = buffer.subarray(IV_LENGTH);
+    const key = crypto.scryptSync(ENCRYPTION_KEY, "salt", 32);
+    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
+    return Buffer.concat([decipher.update(encryptedData), decipher.final()]);
+  }
 }

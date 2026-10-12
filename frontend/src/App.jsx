@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -11,35 +11,40 @@ import {
   ThemeProvider,
   CssBaseline,
   Box,
-  AppBar,
-  Toolbar,
   Typography,
-  IconButton,
+  CircularProgress,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import AppTheme from "./theme/AppTheme";
 import { UIProvider } from "./context/UIContext";
+import { AuthProvider } from "./context/AuthContext";
 import { Provider, useSelector, useDispatch } from "react-redux";
 import { store } from "./store";
-import { clearAuth } from "./store/authSlice";
+import { setAuth, clearAuth, setInitialized } from "./store/authSlice";
+import { getMeApi } from "./services/user.service";
+import { logoutUserApi } from "./services/auth.service";
 
 // Components & Views
+import Header from "./components/layouts/Header";
+import Sidebar from "./components/layouts/Sidebar";
 import Footer from "./components/core/Footer";
-import Sidebar from "./components/core/Sidebar";
 import ConfirmationDialog from "./components/core/ConfirmationDialog";
 import Terms from "./components/docs/Terms";
-import PrivacyPolicy from "./components/docs/PrivacyPolicy";
+import PrivacyPolicy from "./components/docs/LegalPrivacy";
 import Register from "./views/Auth/Register";
 import Login from "./views/Auth/Login";
 import CategoryManager from "./views/Category/CategoryManager";
 import BudgetAllocation from "./views/Budget/BudgetAllocation";
 import ExpenseManager from "./views/Expense/ExpenseManager";
 import UserDashboard from "./views/Dashboard/UserDashboard";
+import ReportsView from "./views/Reports/ReportsView";
 import UserProfile from "./views/Profile/UserProfile";
+import SessionTimeoutModal from "./components/auth/SessionTimeoutModal";
+import useSmoothScroll, { smoothScrollTo } from "./hooks/useSmoothScroll";
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, isInitialized } = useSelector((state) => state.auth);
+  if (!isInitialized) return null;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return children;
 };
@@ -83,10 +88,47 @@ const MainLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, isInitialized } = useSelector((state) => state.auth);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [logoutDialog, setLogoutDialog] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+
+  // Global GSAP Smooth Scrolling
+  useSmoothScroll();
+
+  // Smooth scroll to top on route navigation
+  useEffect(() => {
+    smoothScrollTo(0, { duration: 0.45, ease: "power2.out" });
+  }, [location.pathname]);
+
+  // Session hydration on page reload using get-me API
+  useEffect(() => {
+    let isMounted = true;
+    const hydrateSession = async () => {
+      try {
+        const res = await getMeApi();
+        if (isMounted && res.status === "success" && res.data) {
+          dispatch(
+            setAuth({
+              user: res.data.user,
+              accessToken: res.data.accessToken,
+            }),
+          );
+        } else if (isMounted) {
+          dispatch(setInitialized(true));
+        }
+      } catch {
+        if (isMounted) {
+          dispatch(setInitialized(true));
+        }
+      }
+    };
+
+    hydrateSession();
+    return () => {
+      isMounted = false;
+    };
+  }, [dispatch]);
 
   const sidebarWidth = isSidebarExpanded ? 240 : 76;
 
@@ -99,10 +141,14 @@ const MainLayout = () => {
     setLogoutDialog(true);
   };
 
-  const handleConfirmLogout = () => {
-    dispatch(clearAuth());
-    setLogoutDialog(false);
-    navigate("/login");
+  const handleConfirmLogout = async () => {
+    try {
+      await logoutUserApi().catch(() => {});
+    } finally {
+      dispatch(clearAuth());
+      setLogoutDialog(false);
+      navigate("/login");
+    }
   };
 
   const isAuthPage =
@@ -110,51 +156,62 @@ const MainLayout = () => {
   const isDocPage =
     location.pathname === "/terms" || location.pathname === "/privacy";
 
+  if (!isInitialized) {
+    return (
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        minHeight="100vh"
+        bgcolor="background.default"
+        gap={2}
+      >
+        <CircularProgress size={48} color="primary" />
+        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+          Restoring secure session...
+        </Typography>
+      </Box>
+    );
+  }
+
+  const showSidebar = isAuthenticated && !isAuthPage && !isDocPage;
+
   return (
-    <Box display="flex" flexDirection="column" minHeight="100vh" sx={{ maxWidth: "100vw", overflowX: "hidden" }}>
-      {/* Top Navbar */}
+    <Box
+      display="flex"
+      flexDirection="column"
+      minHeight="100vh"
+      sx={{ width: "100%", maxWidth: "100vw", overflowX: "hidden" }}
+    >
+      {/* Session Inactivity Timeout Modal */}
+      {isAuthenticated && <SessionTimeoutModal />}
+
+      {/* Top Navbar Header */}
       {isAuthenticated && !isDocPage && (
-        <AppBar
-          position="fixed"
-          sx={{
-            width: { md: `calc(100% - ${sidebarWidth}px)` },
-            ml: { md: `${sidebarWidth}px` },
-            bgcolor: "primary.main",
-            transition: (theme) => theme.transitions.create(["width", "margin"], {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
-            }),
-          }}
-        >
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              edge="start"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              sx={{ mr: 2, display: { md: "none" } }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" fontWeight={700} sx={{ flexGrow: 1 }}>
-              CW Expense Tracker
-            </Typography>
-          </Toolbar>
-        </AppBar>
+        <Header
+          sidebarWidth={sidebarWidth}
+          isSidebarExpanded={isSidebarExpanded}
+          onToggleSidebar={() => setIsSidebarExpanded(!isSidebarExpanded)}
+          onToggleMobile={() => setMobileOpen(!mobileOpen)}
+        />
       )}
 
       <Box
         display="flex"
         flexGrow={1}
+        width="100%"
         pt={isAuthenticated && !isDocPage ? { xs: 7, sm: 8 } : 0}
         sx={{ maxWidth: "100vw" }}
       >
         {/* Sidebar */}
-        {isAuthenticated && !isAuthPage && !isDocPage && (
+        {showSidebar && (
           <Sidebar
             open={mobileOpen}
             onClose={() => setMobileOpen(false)}
             onLogout={handleLogoutClick}
             expandable={true}
+            isExpanded={isSidebarExpanded}
             onExpandChange={setIsSidebarExpanded}
           />
         )}
@@ -166,73 +223,94 @@ const MainLayout = () => {
           display="flex"
           flexDirection="column"
           bgcolor="background.default"
-          width={{ xs: "100%", md: `calc(100% - ${sidebarWidth}px)` }}
+          width={
+            showSidebar
+              ? { xs: "100%", md: `calc(100% - ${sidebarWidth}px)` }
+              : "100%"
+          }
           sx={{
-            maxWidth: { xs: "100vw", md: `calc(100vw - ${sidebarWidth}px)` },
-            transition: (theme) => theme.transitions.create("width", {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
-            }),
+            maxWidth: showSidebar
+              ? { xs: "100vw", md: `calc(100vw - ${sidebarWidth}px)` }
+              : "100%",
+            transition: (theme) =>
+              theme.transitions.create("width", {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
           }}
         >
-          <Box flexGrow={1} p={2}>
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/terms"
-              element={<Terms onBack={() => navigate(-1)} />}
-            />
-            <Route
-              path="/privacy"
-              element={<PrivacyPolicy onBack={() => navigate(-1)} />}
-            />
+          <Box
+            flexGrow={1}
+            p={isAuthPage ? 0 : 2}
+            display="flex"
+            flexDirection="column"
+            width="100%"
+          >
+            <Routes>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/terms"
+                element={<Terms onBack={() => navigate(-1)} />}
+              />
+              <Route
+                path="/privacy"
+                element={<PrivacyPolicy onBack={() => navigate(-1)} />}
+              />
 
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <UserDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/categories"
-              element={
-                <ProtectedRoute>
-                  <CategoryManager />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/budget"
-              element={
-                <ProtectedRoute>
-                  <BudgetAllocation />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/expenses"
-              element={
-                <ProtectedRoute>
-                  <ExpenseManager />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <UserProfile />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <UserDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/reports"
+                element={
+                  <ProtectedRoute>
+                    <ReportsView />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/categories"
+                element={
+                  <ProtectedRoute>
+                    <CategoryManager />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/budget"
+                element={
+                  <ProtectedRoute>
+                    <BudgetAllocation />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/expenses"
+                element={
+                  <ProtectedRoute>
+                    <ExpenseManager />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <UserProfile />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Default Error Page */}
-            <Route path="*" element={<ErrorPage />} />
-          </Routes>
+              {/* Default Error Page */}
+              <Route path="*" element={<ErrorPage />} />
+            </Routes>
           </Box>
           {/* Footer */}
           <Footer onNavigate={handleNavigateDoc} />
@@ -261,7 +339,9 @@ function App() {
         <CssBaseline />
         <UIProvider>
           <BrowserRouter>
-            <MainLayout />
+            <AuthProvider>
+              <MainLayout />
+            </AuthProvider>
           </BrowserRouter>
         </UIProvider>
       </ThemeProvider>

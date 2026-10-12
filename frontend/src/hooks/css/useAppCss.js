@@ -49,7 +49,34 @@ function useAppCss() {
     [],
   );
 
-  return { GlobalTableCss, GlobalPaperCss };
+  const GlobalDialogTitle = useMemo(
+    () => ({
+      display: "flex",
+      alignItems: "center",
+      gap: 1,
+      fontWeight: 700,
+      bgcolor: "primary.main",
+      color: "white",
+      py: 2,
+    }),
+    [],
+  );
+
+  const GlobalDialogDividerCss = useMemo(
+    () => ({
+      py: 2,
+      borderTop: `1px solid ${theme.palette.divider}`,
+      borderBottom: `1px solid ${theme.palette.divider}`,
+    }),
+    [theme],
+  );
+
+  return {
+    GlobalTableCss,
+    GlobalPaperCss,
+    GlobalDialogTitle,
+    GlobalDialogDividerCss,
+  };
 }
 
 export default useAppCss;

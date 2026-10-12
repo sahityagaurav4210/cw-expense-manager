@@ -4,6 +4,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 
+export const categoryDefaultSorting = [{ id: "id", desc: true }];
+
 export const useCategoryColumns = ({ onToggleActive, onDelete }) => {
   return useMemo(
     () => [
@@ -11,6 +13,7 @@ export const useCategoryColumns = ({ onToggleActive, onDelete }) => {
         accessorKey: "id",
         header: "ID",
         size: 70,
+        sortDescFirst: true,
       },
       {
         accessorKey: "name",

@@ -96,6 +96,9 @@ const AppTheme = (fontSize = 14) =>
       },
       MuiCssBaseline: {
         styleOverrides: {
+          html: {
+            scrollBehavior: "smooth",
+          },
           "*": {
             "::-webkit-scrollbar": {
               width: "8px",

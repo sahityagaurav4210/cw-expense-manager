@@ -11,6 +11,9 @@ export interface ExpenseAttributes {
   amount: number;
   type: "Fixed" | "Variable";
   expense_date?: string;
+  bill_url?: string | null;
+  bill_original_name?: string | null;
+  bill_mime_type?: string | null;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -23,6 +26,9 @@ export class Expense extends Model<ExpenseAttributes> implements ExpenseAttribut
   public declare amount: number;
   public declare type: "Fixed" | "Variable";
   public declare expense_date: string;
+  public declare bill_url: string | null;
+  public declare bill_original_name: string | null;
+  public declare bill_mime_type: string | null;
   public declare readonly created_at: Date;
   public declare readonly updated_at: Date;
 }
@@ -66,6 +72,18 @@ Expense.init(
       type: DataTypes.DATEONLY,
       allowNull: true,
       defaultValue: DataTypes.NOW,
+    },
+    bill_url: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    bill_original_name: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    bill_mime_type: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
     },
   },
   {

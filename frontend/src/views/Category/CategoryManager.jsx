@@ -17,10 +17,14 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import { useCategory } from "../../hooks/useCategory";
-import { useCategoryColumns } from "../../hooks/mrt/useCategoryColumns";
+import {
+  useCategoryColumns,
+  categoryDefaultSorting,
+} from "../../hooks/mrt/useCategoryColumns";
 import ConfirmationDialog from "../../components/core/ConfirmationDialog";
 import CaptchaComponent from "../../components/core/CaptchaComponent";
 import PaperComponent from "../../components/core/PaperComponent";
+import AppDialogTitle from "../../components/core/AppDialogTitle";
 import useAppCss from "../../hooks/css/useAppCss";
 
 const CategoryManager = () => {
@@ -51,6 +55,9 @@ const CategoryManager = () => {
   const table = useMaterialReactTable({
     columns,
     data: categories,
+    initialState: {
+      sorting: categoryDefaultSorting,
+    },
     state: { isLoading: loading },
     enableColumnActions: true,
     enableColumnFilters: true,
@@ -102,9 +109,11 @@ const CategoryManager = () => {
         fullWidth
         PaperComponent={PaperComponent}
       >
-        <DialogTitle sx={{ fontWeight: 700, color: "primary.main" }}>
-          Create Category Master
-        </DialogTitle>
+        <AppDialogTitle
+          title="Create Category Master"
+          onClose={handleCloseModal}
+          Icon={<CategoryIcon sx={{ color: "white" }} />}
+        />
         <Box component="form" onSubmit={requestCreateConfirmation}>
           <DialogContent dividers>
             <Box display="flex" flexDirection="column" gap={2}>

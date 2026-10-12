@@ -31,7 +31,8 @@ export const useCategory = () => {
     setLoading(true);
     try {
       const res = await getCategoriesApi();
-      setCategories(res.data || []);
+      const items = (res.data || []).slice().sort((a, b) => Number(b.id) - Number(a.id));
+      setCategories(items);
     } catch (err) {
       showAlert(err.response?.data?.message || "Failed to load categories.", "error");
     } finally {

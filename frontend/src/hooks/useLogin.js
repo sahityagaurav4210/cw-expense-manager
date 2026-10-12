@@ -45,7 +45,12 @@ export const useLogin = () => {
     setLoading(true);
     try {
       const res = await loginUserApi({ ...formData, captchaId });
-      dispatch(setAuth(res.data.user));
+      dispatch(
+        setAuth({
+          user: res.data.user,
+          accessToken: res.data.accessToken,
+        })
+      );
       showAlert("Login successful! Welcome back.", "success");
       navigate("/dashboard");
     } catch (err) {

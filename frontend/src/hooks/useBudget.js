@@ -3,6 +3,9 @@ import { setBudgetApi, getBudgetsApi } from "../services/budget.service";
 import { budgetZodSchema } from "../validators/zodSchemas";
 import { useUI } from "../context/UIContext";
 import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
+
+dayjs.extend(isBetween);
 
 export const useBudget = () => {
   const { showAlert } = useUI();
@@ -88,8 +91,26 @@ export const useBudget = () => {
     }
   };
 
+  const isCurrentMonthBudget = useCallback((b) => {
+    if (!b || !b.from_date) return false;
+    const today = dayjs();
+    const currentMonthKey = today.format("YYYY-MM");
+    const budgetMonthKey = dayjs(b.from_date).format("YYYY-MM");
+    return (
+      budgetMonthKey === currentMonthKey ||
+      today.isBetween(dayjs(b.from_date), dayjs(b.to_date), "day", "[]")
+    );
+  }, []);
+
+  const activeBudget = budgets.find((b) => isCurrentMonthBudget(b)) || null;
+  const historicalBudgets = budgets.filter((b) => !isCurrentMonthBudget(b));
+
   return {
     budgets,
+    activeBudget,
+    historicalBudgets,
+    isCurrentMonthBudget,
+    fetchBudgets,
     loading,
     formData,
     captchaId,

@@ -6,3 +6,5 @@ build/
 logs/
 uploads/
 requests.log
+target/
+.idea/

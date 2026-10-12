@@ -9,7 +9,9 @@ export class UserService {
     if (!user) {
       throw new Error("User not found.");
     }
-    return user;
+    const userData = user.toJSON() as any;
+    userData.profile_photo = userData.profile_photo_url;
+    return userData;
   }
 
   public static async updateProfile(userId: number, updateData: { name?: string; phone_no?: string; employment_type?: "Salaried" | "Self-Employed"; captchaText: string; captchaId?: number }, profilePhotoUrl?: string) {
@@ -32,6 +34,7 @@ export class UserService {
 
     // Return the updated user without the password
     const { password, ...userWithoutPassword } = user.toJSON() as any;
+    userWithoutPassword.profile_photo = userWithoutPassword.profile_photo_url;
     return userWithoutPassword;
   }
 }

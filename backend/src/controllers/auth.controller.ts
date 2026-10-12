@@ -13,17 +13,23 @@ export class AuthController {
       const profilePhotoUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
       const result = await AuthService.register(value, profilePhotoUrl);
 
-      res.cookie("access_token", result.token, {
+      // Set httpOnly secure refresh token cookie
+      res.cookie("refresh_token", result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: 86400000,
+        path: "/",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
+      res.clearCookie("access_token");
 
       return res.status(201).json({
         status: "success",
         message: "User registered successfully.",
-        data: result,
+        data: {
+          user: result.user,
+          accessToken: result.accessToken,
+        },
       });
     } catch (err) {
       return res.status(400).json({ status: "error", message: (err as Error).message });
@@ -39,17 +45,23 @@ export class AuthController {
 
       const result = await AuthService.login(value);
 
-      res.cookie("access_token", result.token, {
+      // Set httpOnly secure refresh token cookie
+      res.cookie("refresh_token", result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: 86400000,
+        path: "/",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
+      res.clearCookie("access_token");
 
       return res.status(200).json({
         status: "success",
         message: "User logged in successfully.",
-        data: result,
+        data: {
+          user: result.user,
+          accessToken: result.accessToken,
+        },
       });
     } catch (err) {
       return res.status(400).json({ status: "error", message: (err as Error).message });
@@ -57,6 +69,12 @@ export class AuthController {
   }
 
   public static async logout(req: Request, res: Response) {
+    res.clearCookie("refresh_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    });
     res.clearCookie("access_token");
     return res.status(200).json({ status: "success", message: "Logged out successfully." });
   }

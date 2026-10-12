@@ -19,6 +19,8 @@ export const useExpense = () => {
     expense_date: dayjs().format("YYYY-MM-DD"),
     captchaText: "",
   });
+  const [billFile, setBillFile] = useState(null);
+  const [isBillReady, setIsBillReady] = useState(true);
   const [captchaId, setCaptchaId] = useState("");
   const [errors, setErrors] = useState({});
 
@@ -62,14 +64,25 @@ export const useExpense = () => {
       expense_date: dayjs().format("YYYY-MM-DD"),
       captchaText: "",
     });
+    setBillFile(null);
+    setIsBillReady(true);
     setErrors({});
     setModalOpen(true);
   };
 
-  const handleCloseModal = () => setModalOpen(false);
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setBillFile(null);
+    setIsBillReady(true);
+  };
 
   const requestCreateConfirmation = (e) => {
     e.preventDefault();
+    if (!isBillReady) {
+      showAlert("Please wait for the bill file upload to complete processing.", "warning");
+      return;
+    }
+
     const result = expenseZodSchema.safeParse(formData);
     if (!result.success) {
       const formatted = {};
@@ -82,7 +95,7 @@ export const useExpense = () => {
     setConfirmDialog({
       open: true,
       heading: "Add Expense Record",
-      text: `Confirm adding expense "${formData.name}" of amount ₹${parseFloat(formData.amount).toLocaleString("en-IN")}?`,
+      text: `Confirm adding expense "${formData.name}" of amount ₹${parseFloat(formData.amount).toLocaleString("en-IN")}${billFile ? " with attached bill" : ""}?`,
       actionType: "CREATE",
       targetExpense: null,
       loading: false,
@@ -104,9 +117,26 @@ export const useExpense = () => {
     setConfirmDialog((prev) => ({ ...prev, loading: true }));
     try {
       if (confirmDialog.actionType === "CREATE") {
-        await createExpenseApi({ ...formData, captchaId });
+        const payload = new FormData();
+        payload.append("name", formData.name);
+        payload.append("amount", formData.amount);
+        if (formData.category_id) {
+          payload.append("category_id", formData.category_id);
+        }
+        payload.append("type", formData.type);
+        payload.append("expense_date", formData.expense_date);
+        payload.append("captchaText", formData.captchaText);
+        if (captchaId) {
+          payload.append("captchaId", captchaId);
+        }
+        if (billFile) {
+          payload.append("bill", billFile);
+        }
+
+        await createExpenseApi(payload);
         showAlert("Expense recorded successfully!", "success");
         setModalOpen(false);
+        setBillFile(null);
         fetchData();
       } else if (confirmDialog.actionType === "DELETE" && confirmDialog.targetExpense) {
         await deleteExpenseApi(confirmDialog.targetExpense.id, {
@@ -129,6 +159,10 @@ export const useExpense = () => {
     loading,
     modalOpen,
     formData,
+    billFile,
+    setBillFile,
+    isBillReady,
+    setIsBillReady,
     captchaId,
     setCaptchaId,
     errors,
@@ -140,5 +174,6 @@ export const useExpense = () => {
     requestCreateConfirmation,
     requestDeleteConfirmation,
     executeConfirmedAction,
+    fetchData,
   };
 };
