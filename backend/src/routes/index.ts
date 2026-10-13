@@ -7,6 +7,8 @@ import dashboardRoutes from "./dashboard.routes";
 import appRoutes from "./app.routes";
 import userRoutes from "./user.routes";
 import reportRoutes from "./report.routes";
+import debtRoutes from "./debt.routes";
+import contactRoutes from "./contact.routes";
 
 const router = Router();
 
@@ -18,5 +20,7 @@ router.use("/dashboard", dashboardRoutes);
 router.use("/app", appRoutes);
 router.use("/users", userRoutes);
 router.use("/reports", reportRoutes);
+router.use("/debts", debtRoutes);
+router.use("/contacts", contactRoutes);
 
 export default router;

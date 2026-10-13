@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware";
-import { ExpenseService } from "../services/expense.service";
-import { expenseSchema } from "../validators";
+import { ExpenseService, BulkValidationException } from "../services/expense.service";
+import { expenseSchema, bulkExpenseRequestSchema } from "../validators";
 
 export class ExpenseController {
   public static async create(req: AuthenticatedRequest, res: Response) {
@@ -18,6 +18,63 @@ export class ExpenseController {
       return res.status(201).json({ status: "success", message: "Expense record created.", data: expense });
     } catch (err) {
       return res.status(400).json({ status: "error", message: (err as Error).message });
+    }
+  }
+
+  public static async bulkCreate(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) return res.status(401).json({ status: "error", message: "Unauthorized" });
+
+      const { error, value } = bulkExpenseRequestSchema.validate(req.body);
+      if (error) {
+        return res.status(400).json({ status: "error", message: error.details[0].message });
+      }
+
+      const filesArray = Array.isArray(req.files) ? req.files : [];
+      const uploadedFile = req.file || filesArray[0];
+
+      if (!uploadedFile) {
+        return res.status(400).json({
+          status: "error",
+          message: "Please attach the filled BULK EXPENSE CREATION TEMPLATE.xlsx file.",
+        });
+      }
+
+      const createdExpenses = await ExpenseService.bulkCreateExpenses(userId, value, uploadedFile);
+      return res.status(201).json({
+        status: "success",
+        message: `${createdExpenses.length} expense record(s) created in bulk successfully.`,
+        count: createdExpenses.length,
+        data: createdExpenses,
+      });
+    } catch (err) {
+      if (err instanceof BulkValidationException) {
+        return res.status(400).json({
+          status: "error",
+          message: err.message,
+          errors: err.errors,
+        });
+      }
+      return res.status(400).json({ status: "error", message: (err as Error).message });
+    }
+  }
+
+  public static async downloadBulkTemplate(req: AuthenticatedRequest, res: Response) {
+    try {
+      const result = ExpenseService.getBulkTemplateFile();
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${result.fileName}"`
+      );
+      res.setHeader("Content-Length", result.buffer.length);
+      return res.end(result.buffer);
+    } catch (err) {
+      return res.status(404).json({ status: "error", message: (err as Error).message });
     }
   }
 
@@ -57,12 +114,7 @@ export class ExpenseController {
       if (!userId) return res.status(401).json({ status: "error", message: "Unauthorized" });
 
       const { id } = req.params;
-      const { captchaText, captchaId } = req.body;
-      if (!captchaText) {
-        return res.status(400).json({ status: "error", message: "CAPTCHA text is required." });
-      }
-
-      const result = await ExpenseService.deleteExpense(userId, parseInt(id, 10), captchaText, captchaId);
+      const result = await ExpenseService.deleteExpense(userId, parseInt(id, 10));
       return res.status(200).json({ status: "success", message: result.message });
     } catch (err) {
       return res.status(400).json({ status: "error", message: (err as Error).message });
@@ -90,3 +142,4 @@ export class ExpenseController {
     }
   }
 }
+

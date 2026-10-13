@@ -22,7 +22,8 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import PersonIcon from "@mui/icons-material/Person";
+import SettingsIcon from "@mui/icons-material/Settings";
+import HandshakeIcon from "@mui/icons-material/Handshake";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { resolvePhotoUrl } from "../../views/Profile/UserProfile";
@@ -59,7 +60,6 @@ const Sidebar = ({
   const navItems = [
     { label: "User Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
     { label: "Reports", path: "/reports", icon: <AssessmentIcon /> },
-    { label: "My Profile", path: "/profile", icon: <PersonIcon /> },
     {
       label: "Category Management",
       path: "/categories",
@@ -74,6 +74,16 @@ const Sidebar = ({
       label: "Expense Management",
       path: "/expenses",
       icon: <ReceiptLongIcon />,
+    },
+    {
+      label: "Debts & Receivables",
+      path: "/debts",
+      icon: <HandshakeIcon />,
+    },
+    {
+      label: "Settings",
+      path: "/settings",
+      icon: <SettingsIcon />,
     },
   ];
 

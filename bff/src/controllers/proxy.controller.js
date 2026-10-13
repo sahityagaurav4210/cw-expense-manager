@@ -35,7 +35,11 @@ function forwardResponseHeadersAndStream(axiosResp, res) {
 
 class ProxyController {
   static async forwardRequest(req, res) {
-    const basePath = req.originalUrl.split("?")[0];
+    const rawPath = req.originalUrl.split("?")[0];
+    const basePath =
+      rawPath.length > 1 && rawPath.endsWith("/")
+        ? rawPath.replace(/\/+$/, "")
+        : rawPath;
     const isUploads = basePath.startsWith("/uploads");
     const fallbackUrl = `${BACKEND_URL}${basePath}`;
     const targetUrl = isUploads ? fallbackUrl : `${API_GATEWAY_URL}${basePath}`;
@@ -43,20 +47,32 @@ class ProxyController {
     const headers = {
       ...req.headers,
       host: undefined,
+      origin: undefined,
     };
 
-    const isGetOrHead = ["GET", "HEAD"].includes(req.method.toUpperCase());
-    if (isGetOrHead) {
-      delete headers["content-length"];
-    }
+    // Always delete content-length so axios accurately sets the payload byte length
+    delete headers["content-length"];
 
     if (req.cookies && req.cookies.access_token) {
       headers["authorization"] = `Bearer ${req.cookies.access_token}`;
     }
 
-    const data = isGetOrHead
-      ? undefined
-      : (req.headers["content-type"]?.includes("multipart/form-data") ? req : req.body);
+    const isGetOrHead = ["GET", "HEAD"].includes(req.method.toUpperCase());
+    let data = undefined;
+    if (!isGetOrHead) {
+      if (req.headers["content-type"]?.includes("multipart/form-data")) {
+        data = await new Promise((resolve, reject) => {
+          const chunks = [];
+          req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+          req.on("end", () => resolve(Buffer.concat(chunks)));
+          req.on("error", (err) => reject(err));
+        });
+      } else if (req.body && Object.keys(req.body).length > 0) {
+        data = req.body;
+      } else {
+        data = undefined;
+      }
+    }
 
     try {
       logger.info(`BFF Forwarding request: ${req.method} ${targetUrl}`);
@@ -70,9 +86,9 @@ class ProxyController {
         validateStatus: () => true, // Pass-through status codes from gateway
       });
 
-      // If gateway returns 404 for an API request, attempt direct backend fallback
-      if (response.status === 404 && targetUrl !== fallbackUrl) {
-        logger.warn(`Gateway returned 404 for ${targetUrl}, trying backend fallback: ${fallbackUrl}`);
+      // If gateway returns 404, 403, or 500 (gateway connection reset/error), attempt direct backend fallback
+      if ((response.status === 404 || response.status === 403 || response.status >= 500) && targetUrl !== fallbackUrl) {
+        logger.warn(`Gateway returned ${response.status} for ${targetUrl}, trying backend fallback: ${fallbackUrl}`);
         const fallbackResp = await axios({
           method: req.method,
           url: fallbackUrl,

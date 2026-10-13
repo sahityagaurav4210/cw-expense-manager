@@ -38,6 +38,8 @@ import ExpenseManager from "./views/Expense/ExpenseManager";
 import UserDashboard from "./views/Dashboard/UserDashboard";
 import ReportsView from "./views/Reports/ReportsView";
 import UserProfile from "./views/Profile/UserProfile";
+import SettingsView from "./views/Settings/SettingsView";
+import DebtsReceivables from "./views/Debts/DebtsReceivables";
 import SessionTimeoutModal from "./components/auth/SessionTimeoutModal";
 import useSmoothScroll, { smoothScrollTo } from "./hooks/useSmoothScroll";
 
@@ -300,12 +302,24 @@ const MainLayout = () => {
                 }
               />
               <Route
-                path="/profile"
+                path="/debts"
                 element={
                   <ProtectedRoute>
-                    <UserProfile />
+                    <DebtsReceivables />
                   </ProtectedRoute>
                 }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <SettingsView />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={<Navigate to="/settings" replace />}
               />
 
               {/* Default Error Page */}

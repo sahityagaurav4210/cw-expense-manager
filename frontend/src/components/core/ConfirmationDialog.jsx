@@ -15,8 +15,6 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import PaperComponent from "./PaperComponent";
 import useAppCss from "../../hooks/AppCss";
 
-import AppDialogTitle from "./AppDialogTitle";
-
 function ConfirmationDialog({
   open,
   isLoading,
@@ -51,11 +49,12 @@ function ConfirmationDialog({
       PaperComponent={PaperComponent}
     >
       <Box component="div" sx={style}>
-        <AppDialogTitle
-          title={heading || "Confirmation"}
-          onClose={onCancel || (() => {})}
-          Icon={Icon}
-        />
+        <DialogTitle
+          id="cnf-dialog-title"
+          sx={{ pb: 1, bgcolor: "transparent" }}
+        >
+          <Heading Icon={Icon} text={heading || "Confirmation"} mb={0} />
+        </DialogTitle>
 
         <DialogContent sx={GlobalDialogDividerCss}>
           <Box component="div" my={1}>

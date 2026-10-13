@@ -53,3 +53,28 @@ export const uploadBill = multer({
   },
 });
 
+const excelFileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const ext = path.extname(file.originalname).toLowerCase();
+  const allowedMimes = [
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-excel",
+    "application/octet-stream",
+    "application/zip",
+    "application/x-zip-compressed",
+  ];
+  if (ext === ".xlsx" || allowedMimes.includes(file.mimetype.toLowerCase())) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only *.xlsx Excel template files are allowed for bulk expense creation."));
+  }
+};
+
+export const uploadBulkTemplate = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: excelFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+});
+
+

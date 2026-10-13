@@ -21,8 +21,8 @@ export const downloadExpenseBillApi = async (id) => {
   return response;
 };
 
-export const deleteExpenseApi = async (id, captchaData) => {
-  const response = await axiosInstance.post(`/expenses/${id}/delete`, captchaData);
+export const deleteExpenseApi = async (id, payload = {}) => {
+  const response = await axiosInstance.post(`/expenses/${id}/delete`, payload);
   return response.data;
 };
 
@@ -34,3 +34,18 @@ export const uploadExpenseBillApi = async (id, file) => {
   });
   return response.data;
 };
+
+export const bulkCreateExpenseApi = async (formData) => {
+  const response = await axiosInstance.post("/expenses/bulk", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+export const downloadBulkExpenseTemplateApi = async () => {
+  const response = await axiosInstance.get("/expenses/template", {
+    responseType: "blob",
+  });
+  return response;
+};
+

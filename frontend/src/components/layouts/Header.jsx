@@ -82,7 +82,8 @@ const Header = ({
           edge="start"
           onClick={onToggleMobile}
           sx={{
-            mr: 1.5,
+            mr: 0.56,
+            ml: 0.23,
             display: { md: "none" },
             bgcolor: "rgba(255, 255, 255, 0.12)",
             border: "1px solid rgba(255, 255, 255, 0.2)",
@@ -93,7 +94,7 @@ const Header = ({
           }}
           aria-label="Open navigation menu"
         >
-          <MenuIcon />
+          <MenuIcon sx={{ color: "white" }} fontSize="small" />
         </IconButton>
 
         {/* Heading container with adjacent sidebar toggle arrow on the left */}

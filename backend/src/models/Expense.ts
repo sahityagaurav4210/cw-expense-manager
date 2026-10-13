@@ -57,7 +57,7 @@ Expense.init(
       },
     },
     name: {
-      type: DataTypes.STRING(64),
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
     amount: {

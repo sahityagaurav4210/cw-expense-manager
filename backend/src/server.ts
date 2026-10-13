@@ -122,6 +122,7 @@ async function bootstrap() {
     await sequelize.query("CREATE SCHEMA IF NOT EXISTS public;");
 
     // Ensure expense columns exist
+    await sequelize.query(`ALTER TABLE IF EXISTS "public"."expenses" ALTER COLUMN "name" TYPE VARCHAR(100);`).catch(() => {});
     await sequelize.query(`ALTER TABLE IF EXISTS "public"."expenses" ADD COLUMN IF NOT EXISTS "bill_url" VARCHAR(255);`).catch(() => {});
     await sequelize.query(`ALTER TABLE IF EXISTS "public"."expenses" ADD COLUMN IF NOT EXISTS "bill_original_name" VARCHAR(255);`).catch(() => {});
     await sequelize.query(`ALTER TABLE IF EXISTS "public"."expenses" ADD COLUMN IF NOT EXISTS "bill_mime_type" VARCHAR(100);`).catch(() => {});
@@ -136,6 +137,58 @@ async function bootstrap() {
         "source" VARCHAR(100) NOT NULL,
         "received_date" DATE NOT NULL DEFAULT CURRENT_DATE,
         "notes" VARCHAR(255),
+        "created_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `).catch(() => {});
+
+    // Ensure debts and debt_settlements tables exist
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS "public"."debts" (
+        "id" SERIAL PRIMARY KEY,
+        "user_id" INTEGER NOT NULL REFERENCES "public"."users"("id"),
+        "type" VARCHAR(20) NOT NULL DEFAULT 'LENT',
+        "person_name" VARCHAR(100) NOT NULL,
+        "contact_info" VARCHAR(100),
+        "initial_amount" NUMERIC(12, 2) NOT NULL,
+        "settled_amount" NUMERIC(12, 2) NOT NULL DEFAULT 0,
+        "lent_date" DATE NOT NULL DEFAULT CURRENT_DATE,
+        "due_date" DATE,
+        "status" VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+        "notes" VARCHAR(255),
+        "created_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `).catch(() => {});
+
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS "public"."debt_settlements" (
+        "id" SERIAL PRIMARY KEY,
+        "debt_id" INTEGER NOT NULL REFERENCES "public"."debts"("id") ON DELETE CASCADE,
+        "user_id" INTEGER NOT NULL REFERENCES "public"."users"("id"),
+        "amount" NUMERIC(12, 2) NOT NULL,
+        "settlement_date" DATE NOT NULL DEFAULT CURRENT_DATE,
+        "payment_mode" VARCHAR(50) NOT NULL DEFAULT 'UPI',
+        "notes" VARCHAR(255),
+        "created_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `).catch(() => {});
+
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS "public"."contacts" (
+        "id" SERIAL PRIMARY KEY,
+        "user_id" INTEGER NOT NULL REFERENCES "public"."users"("id") ON DELETE CASCADE,
+        "name" VARCHAR(100) NOT NULL,
+        "phone" VARCHAR(30) NOT NULL,
+        "email" VARCHAR(150),
+        "profile_photo" VARCHAR(255),
+        "company" VARCHAR(100),
+        "job_title" VARCHAR(100),
+        "category" VARCHAR(50) NOT NULL DEFAULT 'Other',
+        "address" VARCHAR(255),
+        "notes" VARCHAR(255),
+        "is_favorite" BOOLEAN NOT NULL DEFAULT false,
         "created_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
