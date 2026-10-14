@@ -8,7 +8,6 @@ import {
   ToggleButton,
   Paper,
   Grid,
-  Chip,
   LinearProgress,
 } from "@mui/material";
 import BarChartIcon from "@mui/icons-material/BarChart";
@@ -24,13 +23,8 @@ import ExpenditureChart from "../reports/ExpenditureChart";
 import { useDashboardGraph } from "../../hooks/useDashboardGraph";
 
 const DashboardGraphView = ({ metrics, selectedMonth }) => {
-  const {
-    graphType,
-    setGraphType,
-    metricType,
-    setMetricType,
-    chartOption,
-  } = useDashboardGraph(metrics, selectedMonth);
+  const { graphType, setGraphType, metricType, setMetricType, chartOption } =
+    useDashboardGraph(metrics, selectedMonth);
 
   const monthlyIncome = metrics?.monthlyIncome || 0;
   const totalExpense = metrics?.totalExpenseIncurred || 0;
@@ -55,7 +49,7 @@ const DashboardGraphView = ({ metrics, selectedMonth }) => {
       : 0;
 
   return (
-    <Box>
+    <Box sx={{ display: { xs: "none", md: "block" } }}>
       {/* 1. Quick KPI Summary Pill Row in Graph View */}
       <Grid container spacing={2} mb={3}>
         <Grid item xs={12} sm={6} md={2.4}>
@@ -72,7 +66,11 @@ const DashboardGraphView = ({ metrics, selectedMonth }) => {
             }}
           >
             <Box>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight={600}
+              >
                 Allocated Income
               </Typography>
               <Typography variant="h6" fontWeight={700} color="primary.main">
@@ -97,7 +95,11 @@ const DashboardGraphView = ({ metrics, selectedMonth }) => {
             }}
           >
             <Box>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight={600}
+              >
                 Total Expenses
               </Typography>
               <Typography variant="h6" fontWeight={700} color="error.main">
@@ -122,7 +124,11 @@ const DashboardGraphView = ({ metrics, selectedMonth }) => {
             }}
           >
             <Box>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight={600}
+              >
                 Money Left
               </Typography>
               <Typography variant="h6" fontWeight={700} color="success.main">
@@ -147,10 +153,18 @@ const DashboardGraphView = ({ metrics, selectedMonth }) => {
             }}
           >
             <Box>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight={600}
+              >
                 Pending Lent
               </Typography>
-              <Typography variant="h6" fontWeight={700} sx={{ color: "#7c3aed" }}>
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                sx={{ color: "#7c3aed" }}
+              >
                 ₹{pendingReceivables.toLocaleString("en-IN")}
               </Typography>
             </Box>
@@ -172,10 +186,18 @@ const DashboardGraphView = ({ metrics, selectedMonth }) => {
             }}
           >
             <Box>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight={600}
+              >
                 Pending Borrowed
               </Typography>
-              <Typography variant="h6" fontWeight={700} sx={{ color: "#ea580c" }}>
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                sx={{ color: "#ea580c" }}
+              >
                 ₹{pendingPayables.toLocaleString("en-IN")}
               </Typography>
             </Box>
@@ -196,8 +218,17 @@ const DashboardGraphView = ({ metrics, selectedMonth }) => {
           mb={2.5}
         >
           {/* Dimension Selector */}
-          <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
-            <Typography variant="caption" fontWeight={600} color="text.secondary">
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+            flexWrap="wrap"
+          >
+            <Typography
+              variant="caption"
+              fontWeight={600}
+              color="text.secondary"
+            >
               Metric Dimension:
             </Typography>
             <ToggleButtonGroup
@@ -242,7 +273,11 @@ const DashboardGraphView = ({ metrics, selectedMonth }) => {
 
           {/* Graph Type Toggles (Direct reference from GraphViewDialog) */}
           <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="caption" fontWeight={600} color="text.secondary">
+            <Typography
+              variant="caption"
+              fontWeight={600}
+              color="text.secondary"
+            >
               Graph Type:
             </Typography>
             <ToggleButtonGroup
@@ -303,7 +338,11 @@ const DashboardGraphView = ({ metrics, selectedMonth }) => {
         <Paper elevation={2} sx={{ p: 2.5, borderRadius: 3 }}>
           <Box display="flex" alignItems="center" gap={1} mb={1.5}>
             <PieChartIcon color="primary" />
-            <Typography variant="subtitle1" fontWeight={700} color="primary.main">
+            <Typography
+              variant="subtitle1"
+              fontWeight={700}
+              color="primary.main"
+            >
               Category Distribution Summary ({selectedMonth})
             </Typography>
           </Box>
@@ -320,7 +359,11 @@ const DashboardGraphView = ({ metrics, selectedMonth }) => {
                     <Typography variant="body2" fontWeight={700}>
                       {cat.category}
                     </Typography>
-                    <Typography variant="body2" fontWeight={700} color="primary.main">
+                    <Typography
+                      variant="body2"
+                      fontWeight={700}
+                      color="primary.main"
+                    >
                       ₹{cat.amount.toLocaleString("en-IN")}
                     </Typography>
                   </Box>
@@ -343,13 +386,22 @@ const DashboardGraphView = ({ metrics, selectedMonth }) => {
 
       {metricType === "cashflow" && (
         <Paper elevation={2} sx={{ p: 2.5, borderRadius: 3 }}>
-          <Typography variant="subtitle1" fontWeight={700} color="primary.main" mb={1}>
+          <Typography
+            variant="subtitle1"
+            fontWeight={700}
+            color="primary.main"
+            mb={1}
+          >
             Cashflow Budget Efficiency
           </Typography>
           <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
             <Typography variant="body2">
               Budget Usage:{" "}
-              <strong style={{ color: budgetUsagePercent > 90 ? "#dc2626" : "#16a34a" }}>
+              <strong
+                style={{
+                  color: budgetUsagePercent > 90 ? "#dc2626" : "#16a34a",
+                }}
+              >
                 {budgetUsagePercent}%
               </strong>
             </Typography>
@@ -364,7 +416,8 @@ const DashboardGraphView = ({ metrics, selectedMonth }) => {
             <Typography variant="body2">
               Net Receivables / Debt Ratio:{" "}
               <strong style={{ color: "#7c3aed" }}>
-                ₹{pendingReceivables.toLocaleString("en-IN")} Lent / ₹{pendingPayables.toLocaleString("en-IN")} Borrowed
+                ₹{pendingReceivables.toLocaleString("en-IN")} Lent / ₹
+                {pendingPayables.toLocaleString("en-IN")} Borrowed
               </strong>
             </Typography>
           </Box>

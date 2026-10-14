@@ -38,6 +38,28 @@ export const loginSchema = Joi.object({
   captchaId: Joi.number().required(),
 });
 
+export const verifyOtpSchema = Joi.object({
+  tempToken: Joi.string().required().messages({
+    "string.empty": "Temporary verification token is required.",
+    "any.required": "Temporary verification token is required.",
+  }),
+  otp: Joi.string().trim().length(6).required().messages({
+    "string.empty": "OTP is required.",
+    "string.length": "OTP must be exactly 6 digits.",
+    "any.required": "OTP is required.",
+  }),
+});
+
+export const resendOtpSchema = Joi.object({
+  tempToken: Joi.string().required().messages({
+    "string.empty": "Temporary verification token is required.",
+    "any.required": "Temporary verification token is required.",
+  }),
+  captchaText: Joi.string().allow("", null).optional(),
+  captcha: Joi.string().allow("", null).optional(),
+  captchaId: Joi.alternatives().try(Joi.number(), Joi.string()).allow("", null).optional(),
+}).unknown(true);
+
 export const categorySchema = Joi.object({
   name: Joi.string()
     .max(100)

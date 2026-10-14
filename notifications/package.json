@@ -1,0 +1,50 @@
+{
+  "name": "cw-pbb-worker",
+  "version": "1.0.0",
+  "description": "This repository contains the code of worker component of portfolio builder backend.",
+  "keywords": [
+    "worker",
+    "subscriber",
+    "nodejs",
+    "portfolio-builder"
+  ],
+  "homepage": "https://github.com/sahityagaurav4210/cw-pbb-worker#readme",
+  "bugs": {
+    "url": "https://github.com/sahityagaurav4210/cw-pbb-worker/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sahityagaurav4210/cw-pbb-worker.git"
+  },
+  "license": "ISC",
+  "author": "Gaurav Sahitya",
+  "type": "module",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc && echo Build completed successfully.",
+    "start": "node build/index.js",
+    "dev": "tsx watch src/index.ts",
+    "deploy:linux": "pwsh scripts/linux/deploy.ps1",
+    "deploy:win": "powershell -ExecutionPolicy Bypass -File .\\scripts\\windows\\deploy.ps1",
+    "version:patch": "npm version patch --no-git-tag-version && node ./scripts/update-version.js",
+    "version:minor": "npm version minor --no-git-tag-version && node ./scripts/update-version.js",
+    "version:major": "npm version major --no-git-tag-version && node ./scripts/update-version.js"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/ioredis": "^4.28.10",
+    "@types/node": "^25.9.1",
+    "@types/nodemailer": "^8.0.0",
+    "@types/winston": "^2.4.4",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "ioredis": "^5.10.1",
+    "nodemailer": "^8.0.7",
+    "winston": "^3.19.0"
+  }
+}

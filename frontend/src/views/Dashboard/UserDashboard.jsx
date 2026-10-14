@@ -226,6 +226,8 @@ const UserDashboard = () => {
         alignItems="center"
         flexWrap="wrap"
         justifyContent="flex-end"
+        my={isMobile ? 2 : 0}
+        rowGap={isMobile ? 1 : 0}
       >
         <TextField
           type="month"
@@ -248,52 +250,61 @@ const UserDashboard = () => {
         </Button>
       </Stack>
 
-      <Stack direction="row" alignItems="center" spacing={1} my={1}>
-        <Typography
-          variant="body2"
-          fontWeight={600}
-          color="text.secondary"
-          sx={{ display: { xs: "none", sm: "block" }, pl: 1 }}
+      {/* Dashboard View Switcher - Hidden on smaller/mobile devices */}
+      {!isMobile && (
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={1}
+          my={1}
+          sx={{ display: { xs: "none", md: "flex" } }}
         >
-          Dashboard View:
-        </Typography>
+          <Typography
+            variant="body2"
+            fontWeight={600}
+            color="text.secondary"
+            sx={{ pl: 1 }}
+          >
+            Dashboard View:
+          </Typography>
 
-        <ToggleButtonGroup
-          value={viewMode}
-          exclusive
-          onChange={handleViewModeChange}
-          size="small"
-          sx={{
-            bgcolor: "#f1f5f9",
-            borderRadius: 2,
-            "& .MuiToggleButton-root": {
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: "0.82rem",
-              px: 2,
-              py: 0.6,
-              border: "none",
-              "&.Mui-selected": {
-                bgcolor: "primary.main",
-                color: "#ffffff",
-                "&:hover": { bgcolor: "primary.dark" },
+          <ToggleButtonGroup
+            value={viewMode}
+            exclusive
+            onChange={handleViewModeChange}
+            size="small"
+            sx={{
+              bgcolor: "#f1f5f9",
+              borderRadius: 2,
+              "& .MuiToggleButton-root": {
+                textTransform: "none",
+                fontWeight: 700,
+                fontSize: "0.82rem",
+                px: 2,
+                py: 0.6,
+                border: "none",
+                "&.Mui-selected": {
+                  bgcolor: "primary.main",
+                  color: "#ffffff",
+                  "&:hover": { bgcolor: "primary.dark" },
+                },
               },
-            },
-          }}
-        >
-          <ToggleButton value="cards" aria-label="cards view">
-            <ViewModuleIcon sx={{ fontSize: 18, mr: 0.75 }} />
-            Cards View
-          </ToggleButton>
-          <ToggleButton value="graph" aria-label="graph view">
-            <BarChartIcon sx={{ fontSize: 18, mr: 0.75 }} />
-            Graph View
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </Stack>
+            }}
+          >
+            <ToggleButton value="cards" aria-label="cards view">
+              <ViewModuleIcon sx={{ fontSize: 18, mr: 0.75 }} />
+              Cards View
+            </ToggleButton>
+            <ToggleButton value="graph" aria-label="graph view">
+              <BarChartIcon sx={{ fontSize: 18, mr: 0.75 }} />
+              Graph View
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Stack>
+      )}
 
-      {/* Conditionally Render: Graph View OR Existing Cards View */}
-      {viewMode === "graph" ? (
+      {/* Conditionally Render: Graph View OR Existing Cards View (Graph View totally hidden on smaller/mobile devices) */}
+      {!isMobile && viewMode === "graph" ? (
         <DashboardGraphView metrics={metrics} selectedMonth={selectedMonth} />
       ) : (
         <>

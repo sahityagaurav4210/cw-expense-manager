@@ -17,12 +17,29 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useLogin } from "../../hooks/useLogin";
 import CaptchaComponent from "../../components/core/CaptchaComponent";
+import OTPWrapper from "../../components/core/OTPWrapper";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const { formData, setCaptchaId, errors, loading, handleChange, handleSubmit } = useLogin();
+
+  const {
+    step,
+    formData,
+    setCaptchaId,
+    errors,
+    loading,
+    handleChange,
+    handleSubmit,
+
+    // OTP
+    tempToken,
+    otpEmail,
+    defaultOtp,
+    handleVerifiedSuccess,
+    handleBackToLogin,
+  } = useLogin();
 
   return (
     <Box
@@ -32,124 +49,160 @@ const Login = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        py: { xs: 4, sm: 6 },
+        py: { xs: 3, sm: 6 },
         px: { xs: 2, sm: 3 },
       }}
     >
       <Container maxWidth="xs" sx={{ p: "0 !important" }}>
-        <Paper elevation={4} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 3, width: "100%" }}>
-        <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
-          <Box
-            sx={{
-              width: 50,
-              height: 50,
-              borderRadius: "50%",
-              bgcolor: "primary.main",
-              color: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              mb: 1,
-            }}
-          >
-            <LockOutlinedIcon fontSize="medium" />
-          </Box>
-          <Typography variant="h5" fontWeight={700} color="primary.main">
-            User Login
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            CW Expense Tracker Portal
-          </Typography>
-        </Box>
-
-        <Box component="form" onSubmit={handleSubmit} noValidate>
-          <Grid container spacing={2}>
-            {/* Email */}
-            <Grid item xs={12}>
-              <TextField
-                label="Email Address"
-                type="email"
-                fullWidth
-                required
-                value={formData.email}
-                onChange={handleChange("email")}
-                error={Boolean(errors.email)}
-                helperText={errors.email}
-              />
-            </Grid>
-
-            {/* Password with Visibility Toggle */}
-            <Grid item xs={12}>
-              <TextField
-                label="Password"
-                type={showPassword ? "text" : "password"}
-                fullWidth
-                required
-                value={formData.password}
-                onChange={handleChange("password")}
-                error={Boolean(errors.password)}
-                helperText={errors.password}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={() => setShowPassword(!showPassword)}
-                        onMouseDown={(e) => e.preventDefault()}
-                        edge="end"
-                        size="small"
-                      >
-                        {showPassword ? (
-                          <VisibilityOff fontSize="small" />
-                        ) : (
-                          <Visibility fontSize="small" />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-
-            {/* CAPTCHA */}
-            <Grid item xs={12}>
-              <CaptchaComponent
-                value={formData.captcha}
-                onChange={handleChange("captcha")}
-                onCaptchaIdChange={setCaptchaId}
-                error={Boolean(errors.captcha)}
-                helperText={errors.captcha}
-              />
-            </Grid>
-
-            {/* Submit */}
-            <Grid item xs={12} mt={1}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                fullWidth
-                disabled={loading}
-                startIcon={loading ? <CircularProgress size={18} color="inherit" /> : null}
+        <Paper
+          elevation={4}
+          sx={{
+            p: { xs: 2.5, sm: 4 },
+            borderRadius: 3,
+            width: "100%",
+            transition: "all 0.3s ease",
+          }}
+        >
+          {step === "CREDENTIALS" ? (
+            /* STEP 1: CREDENTIALS & CAPTCHA */
+            <>
+              <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                mb={3}
               >
-                {loading ? "Signing in..." : "Login"}
-              </Button>
-            </Grid>
-          </Grid>
-        </Box>
+                <Box
+                  sx={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: "50%",
+                    bgcolor: "primary.main",
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 1,
+                  }}
+                >
+                  <LockOutlinedIcon fontSize="medium" />
+                </Box>
+                <Typography variant="h5" fontWeight={700} color="primary.main">
+                  User Login
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  CW Expense Tracker Portal
+                </Typography>
+              </Box>
 
-        <Box display="flex" justifyContent="center" mt={3}>
-          <Typography variant="body2" color="text.secondary">
-            Don't have an account?{" "}
-            <Link component="button" type="button" onClick={() => navigate("/register")} sx={{ fontWeight: 700 }}>
-              Register Here
-            </Link>
-          </Typography>
-        </Box>
-      </Paper>
-    </Container>
-  </Box>
+              <Box component="form" onSubmit={handleSubmit} noValidate>
+                <Grid container spacing={2}>
+                  {/* Email */}
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Email Address"
+                      type="email"
+                      fullWidth
+                      required
+                      value={formData.email}
+                      onChange={handleChange("email")}
+                      error={Boolean(errors.email)}
+                      helperText={errors.email}
+                    />
+                  </Grid>
+
+                  {/* Password with Visibility Toggle */}
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Password"
+                      type={showPassword ? "text" : "password"}
+                      fullWidth
+                      required
+                      value={formData.password}
+                      onChange={handleChange("password")}
+                      error={Boolean(errors.password)}
+                      helperText={errors.password}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              aria-label="toggle password visibility"
+                              onClick={() => setShowPassword(!showPassword)}
+                              onMouseDown={(e) => e.preventDefault()}
+                              edge="end"
+                              size="small"
+                            >
+                              {showPassword ? (
+                                <VisibilityOff fontSize="small" />
+                              ) : (
+                                <Visibility fontSize="small" />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  </Grid>
+
+                  {/* CAPTCHA */}
+                  <Grid item xs={12}>
+                    <CaptchaComponent
+                      value={formData.captcha}
+                      onChange={handleChange("captcha")}
+                      onCaptchaIdChange={setCaptchaId}
+                      error={Boolean(errors.captcha)}
+                      helperText={errors.captcha}
+                    />
+                  </Grid>
+
+                  {/* Submit */}
+                  <Grid item xs={12} mt={1}>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      fullWidth
+                      disabled={loading}
+                      startIcon={
+                        loading ? (
+                          <CircularProgress size={18} color="inherit" />
+                        ) : null
+                      }
+                    >
+                      {loading ? "Signing in..." : "Login"}
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Box>
+
+              <Box display="flex" justifyContent="center" mt={3}>
+                <Typography variant="body2" color="text.secondary">
+                  Don't have an account?{" "}
+                  <Link
+                    component="button"
+                    type="button"
+                    onClick={() => navigate("/register")}
+                    sx={{ fontWeight: 700 }}
+                  >
+                    Register Here
+                  </Link>
+                </Typography>
+              </Box>
+            </>
+          ) : (
+            /* STEP 2: TWO-FACTOR AUTHENTICATION VIA OTPWRAPPER */
+            <OTPWrapper
+              email={otpEmail}
+              tempToken={tempToken}
+              defaultOtp={defaultOtp}
+              onChangeAccount={handleBackToLogin}
+              onVerified={handleVerifiedSuccess}
+            />
+          )}
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 
-export default Login;
+export default React.memo(Login);

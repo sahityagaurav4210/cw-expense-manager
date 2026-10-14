@@ -6,6 +6,7 @@ import { logger } from "./logger.config";
  */
 export class RedisConfig {
   private static instance: Redis;
+  private static publisherInstance: Redis;
   private static readonly KEY_PREFIX = "cw-expense-tracker:";
 
   private constructor() {}
@@ -37,6 +38,35 @@ export class RedisConfig {
 
     return RedisConfig.instance;
   }
+
+  public static getPublisherInstance(): Redis {
+    if (!RedisConfig.publisherInstance) {
+      const redisHost = process.env.REDIS_HOST || "localhost";
+      const redisPort = parseInt(process.env.REDIS_PORT || "6379", 10);
+
+      RedisConfig.publisherInstance = new Redis({
+        host: redisHost,
+        port: redisPort,
+        // No keyPrefix so channel names are exact
+        retryStrategy(times) {
+          const delay = Math.min(times * 100, 2000);
+          return delay;
+        },
+        lazyConnect: true,
+      });
+
+      RedisConfig.publisherInstance.on("connect", () => {
+        logger.info("Connected to Redis publisher successfully.");
+      });
+
+      RedisConfig.publisherInstance.on("error", (err) => {
+        logger.warn(`Redis publisher warning: ${err.message}`);
+      });
+    }
+
+    return RedisConfig.publisherInstance;
+  }
 }
 
 export const redisClient = RedisConfig.getInstance();
+export const redisPublisher = RedisConfig.getPublisherInstance();

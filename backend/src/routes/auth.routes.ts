@@ -6,6 +6,8 @@ const router = Router();
 
 router.post("/register", uploadProfilePhoto.single("profile_photo"), AuthController.register);
 router.post("/login", AuthController.login);
+router.post("/verify-otp", AuthController.verifyOtp);
+router.post("/resend-otp", AuthController.resendOtp);
 router.post("/logout", AuthController.logout);
 
 export default router;

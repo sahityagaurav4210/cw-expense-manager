@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AuthService } from "../services/auth.service";
-import { registerSchema, loginSchema } from "../validators";
+import { registerSchema, loginSchema, verifyOtpSchema, resendOtpSchema } from "../validators";
 
 export class AuthController {
   public static async register(req: Request, res: Response) {
@@ -43,7 +43,43 @@ export class AuthController {
         return res.status(400).json({ status: "error", message: error.details[0].message });
       }
 
-      const result = await AuthService.login(value);
+      const clientIp =
+        (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+        req.socket.remoteAddress ||
+        req.ip ||
+        "127.0.0.1";
+
+      const result = await AuthService.login(value, clientIp);
+
+      return res.status(200).json({
+        status: "success",
+        message: result.message,
+        data: {
+          requiresOtp: result.requiresOtp,
+          tempToken: result.tempToken,
+          email: result.email,
+          defaultOtp: result.defaultOtp,
+        },
+      });
+    } catch (err) {
+      return res.status(400).json({ status: "error", message: (err as Error).message });
+    }
+  }
+
+  public static async verifyOtp(req: Request, res: Response) {
+    try {
+      const { error, value } = verifyOtpSchema.validate(req.body);
+      if (error) {
+        return res.status(400).json({ status: "error", message: error.details[0].message });
+      }
+
+      const clientIp =
+        (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+        req.socket.remoteAddress ||
+        req.ip ||
+        "127.0.0.1";
+
+      const result = await AuthService.verifyLoginOtp(value.tempToken, value.otp, clientIp);
 
       // Set httpOnly secure refresh token cookie
       res.cookie("refresh_token", result.refreshToken, {
@@ -61,6 +97,30 @@ export class AuthController {
         data: {
           user: result.user,
           accessToken: result.accessToken,
+        },
+      });
+    } catch (err) {
+      return res.status(400).json({ status: "error", message: (err as Error).message });
+    }
+  }
+
+  public static async resendOtp(req: Request, res: Response) {
+    try {
+      const { error, value } = resendOtpSchema.validate(req.body);
+      if (error) {
+        return res.status(400).json({ status: "error", message: error.details[0].message });
+      }
+
+      const result = await AuthService.resendLoginOtp(
+        value.tempToken,
+        value.captchaText || value.captcha,
+        value.captchaId,
+      );
+      return res.status(200).json({
+        status: "success",
+        message: result.message,
+        data: {
+          defaultOtp: result.defaultOtp,
         },
       });
     } catch (err) {

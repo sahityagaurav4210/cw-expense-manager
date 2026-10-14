@@ -37,6 +37,14 @@ export const loginZodSchema = z.object({
   captcha: z.string().min(1, "CAPTCHA is required"),
 });
 
+export const otpZodSchema = z.object({
+  otp: z
+    .string()
+    .trim()
+    .length(6, "OTP must be exactly 6 digits")
+    .regex(/^\d{6}$/, "OTP must contain digits only"),
+});
+
 export const categoryZodSchema = z.object({
   name: z
     .string()
