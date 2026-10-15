@@ -1,12 +1,16 @@
-import rateLimit from "express-rate-limit";
+import { Request, Response, NextFunction } from "express";
 
-export const rateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    status: "error",
-    message: "Too many requests from this IP, please try again after 15 minutes.",
-  },
-});
+/**
+ * Rate Limiting Middleware (Migrated to Spring Boot API Gateway)
+ * 
+ * As the Node backend is an internal service accessed only via the Spring Boot
+ * API Gateway (http://localhost:8080), HTTP rate limiting is enforced at the
+ * gateway layer to prevent throttling valid proxied traffic.
+ * 
+ * This pass-through middleware is maintained for backwards compatibility.
+ */
+export const rateLimiter = (req: Request, res: Response, next: NextFunction): void => {
+  next();
+};
+
+export default rateLimiter;

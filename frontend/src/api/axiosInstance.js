@@ -26,7 +26,11 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response && error.response.status === 429) {
-      console.warn("Rate limit reached. Please wait before retrying.");
+      const serverMsg =
+        error.response.data?.message ||
+        "Too many requests from this IP, please try again after 1 minute.";
+      console.warn(`[429 Rate Limit]: ${serverMsg}`);
+      error.message = serverMsg;
     }
 
     // Attempt silent refresh on 401 if not already attempted and not an auth attempt

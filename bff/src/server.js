@@ -12,13 +12,14 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const SERVER_HOST = process.env.SERVER_HOST || "localhost";
 
-// Rate limiting
+// Rate limiting (100 req/minute matching API Gateway)
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 150,
+  windowMs: 1 * 60 * 1000,
+  max: 100,
   message: {
     status: "error",
-    message: "Too many requests from this client, please try again later.",
+    statusCode: 429,
+    message: "Too many requests from this IP, please try again after 1 minute.",
   },
 });
 

@@ -5,6 +5,10 @@ server:
 spring:
   application:
     name: api-gateway
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   cloud:
     gateway:
       globalcors:
@@ -14,6 +18,7 @@ spring:
               - "http://localhost:9123"
               - "http://localhost:3000"
               - "http://localhost:3001"
+              - "http://localhost:4000"
             allowedMethods:
               - GET
               - POST
@@ -25,13 +30,20 @@ spring:
             allowCredentials: true
       routes:
         - id: backend-service
-          uri: http://localhost:5000
+          uri: ${BACKEND_URI:http://localhost:5000}
           predicates:
             - Path=/api/v1/**
+
+gateway:
+  rate-limiter:
+    enabled: true
+    max-requests: 100
+    window-seconds: 60 # 1 minute window (100 requests per minute per IP)
 
 logging:
   level:
     root: INFO
     org.springframework.cloud.gateway: DEBUG
+    com.cw.expensetracker: DEBUG
   file:
     name: logs/api-gateway.log

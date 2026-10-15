@@ -2,14 +2,13 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import path from "path";
-import dotenv from "dotenv";
 import { logger } from "./config/logger.config";
 import { sequelize } from "./config/database.config";
-import { rateLimiter } from "./middlewares/rateLimiter.middleware";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import { cookieParser } from "./middlewares/cookieParser.middleware";
 import routes from "./routes";
 import fs from "fs";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -41,7 +40,7 @@ app.use(
 app.use(cookieParser);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(rateLimiter);
+// Note: Rate limiting is enforced at the Spring Boot API Gateway level
 app.set("trust proxy", true);
 
 // Static uploads folder for profile photos with fallback support

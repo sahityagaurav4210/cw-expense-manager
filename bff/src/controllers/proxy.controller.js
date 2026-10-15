@@ -53,6 +53,11 @@ class ProxyController {
     // Always delete content-length so axios accurately sets the payload byte length
     delete headers["content-length"];
 
+    // Forward original client IP in X-Forwarded-For so API Gateway rate limits per actual client
+    if (!headers["x-forwarded-for"]) {
+      headers["x-forwarded-for"] = req.ip || req.connection?.remoteAddress || "127.0.0.1";
+    }
+
     if (req.cookies && req.cookies.access_token) {
       headers["authorization"] = `Bearer ${req.cookies.access_token}`;
     }
