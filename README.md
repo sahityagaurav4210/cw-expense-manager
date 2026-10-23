@@ -1,5 +1,10 @@
 # CW Expense Manager
 
+![Version](https://img.shields.io/badge/version-1.0.0-green)
+![GitHub License](https://img.shields.io/github/license/sahityagaurav4210/cw-expense-manager)
+![X (formerly Twitter) URL](https://img.shields.io/twitter/url?url=https%3A%2F%2Fx.com%2Fsgauravdev42)
+![GitHub followers](https://img.shields.io/github/followers/sahityagaurav4210)
+
 ## 📌 Overview
 
 Managing day-to-day finances shouldn't require complex spreadsheets, confusing formulas, or hours of manual paperwork. **CW Expense Manager** simplifies how you manage money by bringing income allocation, daily expense logging, loan/debt recovery tracking, and formal audit statements into one cohesive, user-friendly space.
