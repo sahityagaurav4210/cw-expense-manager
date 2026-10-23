@@ -22,6 +22,7 @@ const OtpInput = ({
   disabled = false,
   autoFocus = true,
   submitBtnText = "Verify & Login",
+  hideResend = false,
 }) => {
   const {
     otp,
@@ -176,76 +177,80 @@ const OtpInput = ({
         {otpLoading ? "Verifying..." : submitBtnText}
       </Button>
 
-      {/* Resend OTP Link */}
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        gap={0.75}
-        mt={2}
-        flexWrap="wrap"
-        sx={{ textAlign: "center" }}
-      >
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ fontSize: { xs: "0.8125rem", sm: "0.875rem" } }}
-        >
-          Didn't receive the OTP?
-        </Typography>
-
-        {resendCooldown > 0 ? (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ fontWeight: 600, fontSize: { xs: "0.8125rem", sm: "0.875rem" } }}
+      {/* Resend OTP Link - Only displayed when hideResend is false (e.g. Email OTP mode) */}
+      {!hideResend && (
+        <>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            gap={0.75}
+            mt={2}
+            flexWrap="wrap"
+            sx={{ textAlign: "center" }}
           >
-            Resend in {resendCooldown}s
-          </Typography>
-        ) : (
-          <Link
-            component="button"
-            type="button"
-            onClick={handleResendClick}
-            disabled={disabled || resendLoading || otpLoading}
-            sx={{
-              cursor: "pointer",
-              fontWeight: 600,
-              fontSize: { xs: "0.8125rem", sm: "0.875rem" },
-              color: "primary.main",
-              textDecoration: "underline",
-              textUnderlineOffset: "3px",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 0.5,
-              background: "none",
-              border: "none",
-              p: 0,
-              transition: "all 0.2s ease-in-out",
-              "&:hover": {
-                color: "primary.dark",
-                textDecoration: "underline",
-              },
-              "&:disabled": {
-                cursor: "not-allowed",
-                color: "text.disabled",
-                textDecoration: "none",
-              },
-            }}
-          >
-            <RefreshIcon sx={{ fontSize: "1rem" }} />
-            {resendLoading ? "Resending..." : "Resend OTP"}
-          </Link>
-        )}
-      </Box>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontSize: { xs: "0.8125rem", sm: "0.875rem" } }}
+            >
+              Didn't receive the OTP?
+            </Typography>
 
-      {/* Plug-and-play CaptchaDialog for verifying before calling resend-otp */}
-      <CaptchaDialog
-        {...captchaDialog}
-        title="Verify to Resend OTP"
-        subtitle="Please enter the CAPTCHA code below to verify your request and receive a new OTP."
-        submitBtnText="Verify & Resend OTP"
-      />
+            {resendCooldown > 0 ? (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ fontWeight: 600, fontSize: { xs: "0.8125rem", sm: "0.875rem" } }}
+              >
+                Resend in {resendCooldown}s
+              </Typography>
+            ) : (
+              <Link
+                component="button"
+                type="button"
+                onClick={handleResendClick}
+                disabled={disabled || resendLoading || otpLoading}
+                sx={{
+                  cursor: "pointer",
+                  fontWeight: 600,
+                  fontSize: { xs: "0.8125rem", sm: "0.875rem" },
+                  color: "primary.main",
+                  textDecoration: "underline",
+                  textUnderlineOffset: "3px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  background: "none",
+                  border: "none",
+                  p: 0,
+                  transition: "all 0.2s ease-in-out",
+                  "&:hover": {
+                    color: "primary.dark",
+                    textDecoration: "underline",
+                  },
+                  "&:disabled": {
+                    cursor: "not-allowed",
+                    color: "text.disabled",
+                    textDecoration: "none",
+                  },
+                }}
+              >
+                <RefreshIcon sx={{ fontSize: "1rem" }} />
+                {resendLoading ? "Resending..." : "Resend OTP"}
+              </Link>
+            )}
+          </Box>
+
+          {/* Plug-and-play CaptchaDialog for verifying before calling resend-otp */}
+          <CaptchaDialog
+            {...captchaDialog}
+            title="Verify to Resend OTP"
+            subtitle="Please enter the CAPTCHA code below to verify your request and receive a new OTP."
+            submitBtnText="Verify & Resend OTP"
+          />
+        </>
+      )}
     </Box>
   );
 };

@@ -15,6 +15,9 @@ import {
   Chip,
   Divider,
   CircularProgress,
+  TextField,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -24,9 +27,14 @@ import TableViewIcon from "@mui/icons-material/TableView";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ContactsIcon from "@mui/icons-material/Contacts";
+import SecurityIcon from "@mui/icons-material/Security";
+import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from "@mui/icons-material/Close";
+import SearchOffIcon from "@mui/icons-material/SearchOff";
 import { useLocation } from "react-router-dom";
 import UserProfile from "../Profile/UserProfile";
 import ContactsManager from "./Contacts/ContactsManager";
+import TwoFactorSettings from "./TwoFactorSettings";
 import { downloadBulkExpenseTemplateApi } from "../../services/expense.service";
 import { useUI } from "../../context/UIContext";
 import useAppCss from "../../hooks/css/useAppCss";
@@ -46,12 +54,14 @@ const SettingsView = () => {
   const { GlobalPaperCss } = useAppCss();
   const { showAlert } = useUI();
   const location = useLocation();
-  const [activeView, setActiveView] = useState(null); // null | 'templates' | 'profile'
+  const [activeView, setActiveView] = useState(null); // null | 'templates' | 'profile' | 'contacts' | '2fa'
   const [downloadingId, setDownloadingId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Reset to initial card view when navigating to /settings
   useEffect(() => {
     setActiveView(null);
+    setSearchQuery("");
   }, [location.key]);
 
   const handleDownloadTemplate = async (template) => {
@@ -250,223 +260,320 @@ const SettingsView = () => {
     );
   }
 
+  // Next View: Two-Factor Authentication (2FA)
+  if (activeView === "2fa") {
+    return (
+      <Box display="flex" flexDirection="column" gap={2}>
+        <TwoFactorSettings onBack={() => setActiveView(null)} />
+      </Box>
+    );
+  }
+
+  const SETTINGS_CARDS = [
+    {
+      id: "templates",
+      title: "Templates",
+      description:
+        "View available data templates and download the official Bulk Expense Creation Excel template.",
+      icon: DescriptionIcon,
+      badge: `${AVAILABLE_TEMPLATES.length} Template Available`,
+      keywords: [
+        "template",
+        "excel",
+        "bulk",
+        "upload",
+        "xlsx",
+        "download",
+        "expense",
+      ],
+      onClick: () => setActiveView("templates"),
+    },
+    {
+      id: "profile",
+      title: "Profile",
+      description:
+        "View and update your personal profile details, employment type, phone number, and profile photo.",
+      icon: PersonIcon,
+      badge: "Manage Profile",
+      keywords: [
+        "profile",
+        "account",
+        "user",
+        "personal",
+        "avatar",
+        "photo",
+        "phone",
+        "email",
+        "employment",
+      ],
+      onClick: () => setActiveView("profile"),
+    },
+    {
+      id: "contacts",
+      title: "Contacts",
+      description:
+        "Manage your personal and business contact directory for debts, lending records, and quick communications.",
+      icon: ContactsIcon,
+      badge: "Manage Contacts",
+      keywords: [
+        "contacts",
+        "directory",
+        "people",
+        "phonebook",
+        "debt",
+        "lending",
+        "customer",
+        "vendor",
+      ],
+      onClick: () => setActiveView("contacts"),
+    },
+    {
+      id: "2fa",
+      title: "Two-Factor Authentication (2FA)",
+      description:
+        "Protect your account with Two-Factor Authentication. Choose between Email OTP verification or an Authenticator App (Google Authenticator, Microsoft Authenticator).",
+      icon: SecurityIcon,
+      badge: "Security & 2FA",
+      keywords: [
+        "2fa",
+        "mfa",
+        "two-factor",
+        "two factor",
+        "authenticator",
+        "totp",
+        "google authenticator",
+        "microsoft authenticator",
+        "authy",
+        "security",
+        "otp",
+        "email otp",
+        "verification",
+        "login",
+      ],
+      onClick: () => setActiveView("2fa"),
+    },
+  ];
+
+  const filteredCards = SETTINGS_CARDS.filter((card) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase().trim();
+    return (
+      card.title.toLowerCase().includes(query) ||
+      card.description.toLowerCase().includes(query) ||
+      card.keywords.some((kw) => kw.toLowerCase().includes(query))
+    );
+  });
+
   // Initial Card View
   return (
     <Paper variant="elevation" elevation={3} sx={GlobalPaperCss}>
-      <Box display="flex" alignItems="center" gap={1.2} mb={3}>
-        <SettingsIcon color="primary" sx={{ fontSize: 32 }} />
-        <Box>
-          <Typography variant="h5" fontWeight={700} color="primary.main">
-            Settings
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Select a card below to manage templates, your profile, or your contact directory
-          </Typography>
+      {/* Header & Title */}
+      <Box
+        display="flex"
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        justifyContent="space-between"
+        flexDirection={{ xs: "column", sm: "row" }}
+        gap={2}
+        mb={3}
+      >
+        <Box display="flex" alignItems="center" gap={1.2}>
+          <SettingsIcon color="primary" sx={{ fontSize: 34 }} />
+          <Box>
+            <Typography variant="h5" fontWeight={700} color="primary.main">
+              Settings
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Manage your preferences, security, profile, and system templates
+            </Typography>
+          </Box>
         </Box>
       </Box>
 
-      <Grid container spacing={3}>
-        {/* Templates Card */}
-        <Grid item xs={12} sm={6} md={4}>
-          <Card
-            variant="outlined"
-            sx={{
-              height: "100%",
-              borderColor: "primary.main",
-              borderWidth: 1.5,
-              borderRadius: 3,
+      {/* Windows 10/11 Style Search Box */}
+      <Box
+        sx={{
+          mb: 4,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+        }}
+      >
+        <TextField
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Find a setting"
+          size="medium"
+          fullWidth
+          sx={{
+            maxWidth: 520,
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "28px",
+              backgroundColor: "#f8fafc",
               transition: "all 0.2s ease-in-out",
+              fontSize: "0.95rem",
               "&:hover": {
-                boxShadow: "0 6px 20px rgba(0, 0, 128, 0.14)",
-                transform: "translateY(-2px)",
+                backgroundColor: "#ffffff",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                borderColor: "primary.main",
               },
-            }}
-          >
-            <CardActionArea
-              onClick={() => setActiveView("templates")}
-              sx={{ height: "100%", p: 1 }}
-            >
-              <CardContent>
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  mb={1.5}
-                >
-                  <Box display="flex" alignItems="center" gap={1.5}>
-                    <Box
-                      sx={{
-                        p: 1.2,
-                        borderRadius: 2,
-                        bgcolor: "rgba(0, 0, 128, 0.08)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <DescriptionIcon color="primary" fontSize="large" />
-                    </Box>
-                    <Typography
-                      variant="h6"
-                      fontWeight={700}
-                      color="primary.main"
-                    >
-                      Templates
-                    </Typography>
-                  </Box>
-                  <ChevronRightIcon color="primary" />
-                </Box>
-
-                <Typography variant="body2" color="text.secondary" mb={2}>
-                  View available data templates and download the official Bulk
-                  Expense Creation Excel template.
-                </Typography>
-
-                <Chip
-                  label={`${AVAILABLE_TEMPLATES.length} Template Available`}
-                  color="primary"
+              "&.Mui-focused": {
+                backgroundColor: "#ffffff",
+                boxShadow: "0 4px 14px rgba(0, 0, 128, 0.12)",
+                borderColor: "primary.main",
+              },
+            },
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="primary" />
+              </InputAdornment>
+            ),
+            endAdornment: searchQuery ? (
+              <InputAdornment position="end">
+                <IconButton
                   size="small"
-                  variant="outlined"
-                />
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </Grid>
+                  onClick={() => setSearchQuery("")}
+                  edge="end"
+                  aria-label="clear search"
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </InputAdornment>
+            ) : null,
+          }}
+        />
+        {searchQuery && (
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+            Found {filteredCards.length}{" "}
+            {filteredCards.length === 1 ? "result" : "results"} for "
+            {searchQuery}"
+          </Typography>
+        )}
+      </Box>
 
-        {/* Profile Card */}
-        <Grid item xs={12} sm={6} md={4}>
-          <Card
+      {/* Settings Cards or Empty State */}
+      {filteredCards.length === 0 ? (
+        <Box
+          sx={{
+            p: 6,
+            textAlign: "center",
+            borderRadius: 3,
+            bgcolor: "#f8fafc",
+            border: "1px dashed #cbd5e1",
+          }}
+        >
+          <SearchOffIcon
+            sx={{ fontSize: 56, color: "text.disabled", mb: 1.5 }}
+          />
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            color="text.primary"
+            gutterBottom
+          >
+            No settings found matching "{searchQuery}"
+          </Typography>
+          <Typography variant="body2" color="text.secondary" mb={2}>
+            Try searching for something else like "2FA", "profile", "contacts",
+            or "templates".
+          </Typography>
+          <Button
             variant="outlined"
-            sx={{
-              height: "100%",
-              borderColor: "primary.main",
-              borderWidth: 1.5,
-              borderRadius: 3,
-              transition: "all 0.2s ease-in-out",
-              "&:hover": {
-                boxShadow: "0 6px 20px rgba(0, 0, 128, 0.14)",
-                transform: "translateY(-2px)",
-              },
-            }}
+            color="primary"
+            size="small"
+            onClick={() => setSearchQuery("")}
+            sx={{ textTransform: "none", fontWeight: 600 }}
           >
-            <CardActionArea
-              onClick={() => setActiveView("profile")}
-              sx={{ height: "100%", p: 1 }}
-            >
-              <CardContent>
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  mb={1.5}
-                >
-                  <Box display="flex" alignItems="center" gap={1.5}>
-                    <Box
-                      sx={{
-                        p: 1.2,
-                        borderRadius: 2,
-                        bgcolor: "rgba(0, 0, 128, 0.08)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <PersonIcon color="primary" fontSize="large" />
-                    </Box>
-                    <Typography
-                      variant="h6"
-                      fontWeight={700}
-                      color="primary.main"
-                    >
-                      Profile
-                    </Typography>
-                  </Box>
-                  <ChevronRightIcon color="primary" />
-                </Box>
-
-                <Typography variant="body2" color="text.secondary" mb={2}>
-                  View and update your personal profile details, employment
-                  type, phone number, and profile photo.
-                </Typography>
-
-                <Chip
-                  label="Manage Profile"
-                  color="primary"
-                  size="small"
+            Clear Search
+          </Button>
+        </Box>
+      ) : (
+        <Grid container spacing={3}>
+          {filteredCards.map((card) => {
+            const IconComponent = card.icon;
+            return (
+              <Grid item xs={12} sm={6} md={6} lg={6} key={card.id}>
+                <Card
                   variant="outlined"
-                />
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </Grid>
-
-        {/* Contacts Card */}
-        <Grid item xs={12} sm={6} md={4}>
-          <Card
-            variant="outlined"
-            sx={{
-              height: "100%",
-              borderColor: "primary.main",
-              borderWidth: 1.5,
-              borderRadius: 3,
-              transition: "all 0.2s ease-in-out",
-              "&:hover": {
-                boxShadow: "0 6px 20px rgba(0, 0, 128, 0.14)",
-                transform: "translateY(-2px)",
-              },
-            }}
-          >
-            <CardActionArea
-              onClick={() => setActiveView("contacts")}
-              sx={{ height: "100%", p: 1 }}
-            >
-              <CardContent>
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  mb={1.5}
+                  sx={{
+                    height: "100%",
+                    borderColor: "primary.main",
+                    borderWidth: 1.5,
+                    borderRadius: 3,
+                    transition: "all 0.2s ease-in-out",
+                    "&:hover": {
+                      boxShadow: "0 6px 20px rgba(0, 0, 128, 0.14)",
+                      transform: "translateY(-2px)",
+                    },
+                  }}
                 >
-                  <Box display="flex" alignItems="center" gap={1.5}>
-                    <Box
-                      sx={{
-                        p: 1.2,
-                        borderRadius: 2,
-                        bgcolor: "rgba(0, 0, 128, 0.08)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <ContactsIcon color="primary" fontSize="large" />
-                    </Box>
-                    <Typography
-                      variant="h6"
-                      fontWeight={700}
-                      color="primary.main"
-                    >
-                      Contacts
-                    </Typography>
-                  </Box>
-                  <ChevronRightIcon color="primary" />
-                </Box>
+                  <CardActionArea
+                    onClick={card.onClick}
+                    sx={{ height: "100%", p: 1 }}
+                  >
+                    <CardContent>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                        mb={1.5}
+                      >
+                        <Box display="flex" alignItems="center" gap={1.5}>
+                          <Box
+                            sx={{
+                              p: 1.2,
+                              borderRadius: 2,
+                              bgcolor: "rgba(0, 0, 128, 0.08)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <IconComponent color="primary" fontSize="large" />
+                          </Box>
+                          <Typography
+                            variant="h6"
+                            fontWeight={700}
+                            color="primary.main"
+                          >
+                            {card.title}
+                          </Typography>
+                        </Box>
+                        <ChevronRightIcon color="primary" />
+                      </Box>
 
-                <Typography variant="body2" color="text.secondary" mb={2}>
-                  Manage your personal and business contact directory for debts,
-                  lending records, and quick communications.
-                </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        mb={2}
+                        sx={{
+                          minHeight: 40,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {card.description}
+                      </Typography>
 
-                <Chip
-                  label="Manage Contacts"
-                  color="primary"
-                  size="small"
-                  variant="outlined"
-                />
-              </CardContent>
-            </CardActionArea>
-          </Card>
+                      <Chip
+                        label={card.badge}
+                        color="primary"
+                        size="small"
+                        variant="outlined"
+                      />
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </Grid>
+            );
+          })}
         </Grid>
-      </Grid>
+      )}
     </Paper>
   );
 };

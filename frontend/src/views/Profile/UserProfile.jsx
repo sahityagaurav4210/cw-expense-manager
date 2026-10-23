@@ -9,10 +9,12 @@ import {
   CircularProgress,
   Avatar,
   IconButton,
+  InputAdornment,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import EditIcon from "@mui/icons-material/Edit";
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import { getProfileApi, updateProfileApi } from "../../services/user.service";
 import { useDispatch, useSelector } from "react-redux";
 import { setAuth } from "../../store/authSlice";
@@ -41,6 +43,7 @@ const UserProfile = () => {
     name: user?.name || "",
     phone_no: user?.phone_no || "",
     employment_type: user?.employment_type || "Salaried",
+    annual_income: user?.annual_income !== undefined && user?.annual_income !== null ? user.annual_income : "",
     captchaText: "",
   });
   const [captchaId, setCaptchaId] = useState("");
@@ -68,6 +71,10 @@ const UserProfile = () => {
         name: user.name || prev.name,
         phone_no: user.phone_no || prev.phone_no,
         employment_type: user.employment_type || prev.employment_type,
+        annual_income:
+          user.annual_income !== undefined && user.annual_income !== null
+            ? user.annual_income
+            : prev.annual_income,
       }));
       if (user.email) setEmail(user.email);
     }
@@ -83,6 +90,10 @@ const UserProfile = () => {
           name: res.data.name || "",
           phone_no: res.data.phone_no || "",
           employment_type: res.data.employment_type || "Salaried",
+          annual_income:
+            res.data.annual_income !== null && res.data.annual_income !== undefined
+              ? res.data.annual_income
+              : "",
           captchaText: "",
         });
         setEmail(res.data.email || "");
@@ -135,6 +146,7 @@ const UserProfile = () => {
       data.append("name", formData.name);
       data.append("phone_no", formData.phone_no);
       data.append("employment_type", formData.employment_type);
+      data.append("annual_income", formData.annual_income);
       data.append("captchaText", formData.captchaText);
       if (captchaId) data.append("captchaId", captchaId);
       if (profilePhoto) data.append("profile_photo", profilePhoto);
@@ -262,6 +274,28 @@ const UserProfile = () => {
             <MenuItem value="Salaried">Salaried</MenuItem>
             <MenuItem value="Self-Employed">Self-Employed</MenuItem>
           </TextField>
+
+          <TextField
+            label="Annual Income (INR)"
+            name="annual_income"
+            type="number"
+            value={formData.annual_income}
+            onChange={handleChange}
+            fullWidth
+            inputProps={{ min: 0, step: "any" }}
+            helperText={
+              formData.annual_income
+                ? `₹${Number(formData.annual_income).toLocaleString("en-IN")} per annum`
+                : "Optional (in Indian Rupees ₹)"
+            }
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <CurrencyRupeeIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
+          />
 
           <CaptchaComponent
             value={formData.captchaText}

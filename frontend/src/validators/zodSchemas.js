@@ -28,7 +28,16 @@ export const registerZodSchema = z.object({
   employment_type: z.enum(["Salaried", "Self-Employed"], {
     errorMap: () => ({ message: "Please select an employment type" }),
   }),
+  annual_income: z
+    .string()
+    .optional()
+    .refine((val) => !val || (!/[eE]/.test(val) && !isNaN(Number(val)) && Number(val) >= 0), {
+      message: "Annual income must be a valid non-negative number in INR",
+    }),
   captcha: z.string().min(1, "CAPTCHA text is required").max(8, "CAPTCHA text cannot exceed 8 characters"),
+  isTermsAccepted: z.boolean().refine((val) => val === true, {
+    message: "You must agree to the Terms & Conditions to register",
+  }),
 });
 
 export const loginZodSchema = z.object({
@@ -44,6 +53,27 @@ export const otpZodSchema = z.object({
     .length(6, "OTP must be exactly 6 digits")
     .regex(/^\d{6}$/, "OTP must contain digits only"),
 });
+
+export const forgotPasswordEmailZodSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+});
+
+export const forgotPasswordResetZodSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .max(25, "Password cannot exceed 25 characters")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,25}$/,
+        "Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 special symbol"
+      ),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 export const categoryZodSchema = z.object({
   name: z

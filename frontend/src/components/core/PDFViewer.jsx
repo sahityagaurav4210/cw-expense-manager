@@ -11,7 +11,14 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
  * @param {string} [filename="report.pdf"] - Download filename
  * @param {number|string} [height="600px"] - Height of PDF viewer container
  */
-const PDFViewer = ({ pdfData, title = "Expense Report PDF", filename = "expense_report.pdf", height = "600px" }) => {
+const PDFViewer = ({
+  pdfData,
+  title = "Expense Report PDF",
+  filename = "expense_report.pdf",
+  height = "600px",
+  onDownload,
+  downloading = false,
+}) => {
   const [objectUrl, setObjectUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const iframeRef = React.useRef(null);
@@ -37,6 +44,10 @@ const PDFViewer = ({ pdfData, title = "Expense Report PDF", filename = "expense_
   }, [pdfData]);
 
   const handleDownload = () => {
+    if (onDownload) {
+      onDownload();
+      return;
+    }
     if (iframeRef.current && iframeRef.current.contentWindow) {
       iframeRef.current.contentWindow.focus();
       iframeRef.current.contentWindow.print();
@@ -70,11 +81,18 @@ const PDFViewer = ({ pdfData, title = "Expense Report PDF", filename = "expense_
         <Button
           variant="contained"
           size="small"
-          startIcon={<DownloadIcon />}
+          startIcon={
+            downloading ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : (
+              <DownloadIcon />
+            )
+          }
           onClick={handleDownload}
-          sx={{ textTransform: "none" }}
+          disabled={downloading}
+          sx={{ textTransform: "none", minWidth: 140 }}
         >
-          Download PDF
+          {downloading ? "Downloading..." : "Download PDF"}
         </Button>
       </Box>
       <Paper elevation={2} sx={{ overflow: "hidden", borderRadius: 2 }}>

@@ -8,7 +8,6 @@ export const useDashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(dayjs().format("YYYY-MM"));
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [pdfModalOpen, setPdfModalOpen] = useState(false);
 
   const fetchMetrics = useCallback(async () => {
     setLoading(true);
@@ -37,17 +36,11 @@ export const useDashboard = () => {
     setSelectedMonth(e.target.value);
   };
 
-  const handleOpenPdfModal = () => setPdfModalOpen(true);
-  const handleClosePdfModal = () => setPdfModalOpen(false);
-
   return {
     selectedMonth,
     metrics,
     loading,
-    pdfModalOpen,
     handleMonthChange,
-    handleOpenPdfModal,
-    handleClosePdfModal,
     fetchMetrics,
   };
 };

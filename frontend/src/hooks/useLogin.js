@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { loginUserApi, verifyOtpApi, resendOtpApi } from "../services/auth.service";
+import {
+  loginUserApi,
+  verifyOtpApi,
+  resendOtpApi,
+  switchLogin2faMethodApi,
+} from "../services/auth.service";
 import { loginZodSchema } from "../validators/zodSchemas";
 import { useUI } from "../context/UIContext";
 import { useDispatch } from "react-redux";
@@ -24,6 +29,7 @@ export const useLogin = () => {
   const [loading, setLoading] = useState(false);
 
   // OTP-specific states
+  const [twoFactorMethod, setTwoFactorMethod] = useState("EMAIL");
   const [tempToken, setTempToken] = useState("");
   const [otpEmail, setOtpEmail] = useState("");
   const [defaultOtp, setDefaultOtp] = useState(undefined);
@@ -70,13 +76,14 @@ export const useLogin = () => {
       const res = await loginUserApi({ ...formData, captchaId });
 
       if (res.data?.requiresOtp) {
+        setTwoFactorMethod(res.data.twoFactorMethod || "EMAIL");
         setTempToken(res.data.tempToken);
         setOtpEmail(res.data.email || formData.email);
         setDefaultOtp(res.data.defaultOtp);
         setStep("OTP");
         setResendCooldown(30);
         showAlert(
-          res.message || "OTP has been sent to your registered email address.",
+          res.message || "Please complete two-factor authentication to continue.",
           "info"
         );
       } else {
@@ -179,6 +186,26 @@ export const useLogin = () => {
     navigate("/dashboard");
   };
 
+  const handleSwitch2faMethod = async () => {
+    if (!tempToken || loading) return;
+    setLoading(true);
+    try {
+      const res = await switchLogin2faMethodApi({ tempToken });
+      setTwoFactorMethod(res.data.twoFactorMethod);
+      setDefaultOtp(res.data.defaultOtp);
+      setOtp("");
+      setOtpError("");
+      showAlert(res.message, "info");
+    } catch (err) {
+      showAlert(
+        err.response?.data?.message || err.message || "Failed to switch 2FA method.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     step,
     formData,
@@ -190,11 +217,13 @@ export const useLogin = () => {
     handleSubmit,
 
     // OTP
+    twoFactorMethod,
     tempToken,
     otpEmail,
     defaultOtp,
     handleVerifiedSuccess,
     handleBackToLogin,
+    handleSwitch2faMethod,
     otp,
     otpError,
     otpLoading,
@@ -202,7 +231,6 @@ export const useLogin = () => {
     handleOtpChange,
     handleVerifyOtp,
     handleResendOtp,
-    handleBackToLogin,
     handleUseDefaultOtp,
   };
 };

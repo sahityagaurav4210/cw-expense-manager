@@ -120,6 +120,15 @@ async function bootstrap() {
     await sequelize.query("CREATE SCHEMA IF NOT EXISTS master;");
     await sequelize.query("CREATE SCHEMA IF NOT EXISTS public;");
 
+    // Ensure user 2FA and terms accepted columns exist
+    await sequelize.query(`ALTER TABLE IF EXISTS "public"."users" ADD COLUMN IF NOT EXISTS "two_factor_method" VARCHAR(20) DEFAULT 'EMAIL';`).catch(() => {});
+    await sequelize.query(`ALTER TABLE IF EXISTS "public"."users" ADD COLUMN IF NOT EXISTS "authenticator_secret" VARCHAR(255);`).catch(() => {});
+    await sequelize.query(`ALTER TABLE IF EXISTS "public"."users" ADD COLUMN IF NOT EXISTS "is_authenticator_enabled" BOOLEAN DEFAULT false;`).catch(() => {});
+    await sequelize.query(`UPDATE "public"."users" SET "two_factor_method" = 'AUTHENTICATOR' WHERE "is_authenticator_enabled" = true AND "authenticator_secret" IS NOT NULL;`).catch(() => {});
+    await sequelize.query(`ALTER TABLE IF EXISTS "public"."users" ADD COLUMN IF NOT EXISTS "is_terms_accepted" BOOLEAN DEFAULT false;`).catch(() => {});
+    await sequelize.query(`ALTER TABLE IF EXISTS "public"."users" ADD COLUMN IF NOT EXISTS "isTermsAccepted" BOOLEAN DEFAULT false;`).catch(() => {});
+    await sequelize.query(`ALTER TABLE IF EXISTS "public"."users" ADD COLUMN IF NOT EXISTS "annual_income" NUMERIC(15, 2);`).catch(() => {});
+
     // Ensure expense columns exist
     await sequelize.query(`ALTER TABLE IF EXISTS "public"."expenses" ALTER COLUMN "name" TYPE VARCHAR(100);`).catch(() => {});
     await sequelize.query(`ALTER TABLE IF EXISTS "public"."expenses" ADD COLUMN IF NOT EXISTS "bill_url" VARCHAR(255);`).catch(() => {});

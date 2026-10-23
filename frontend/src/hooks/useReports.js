@@ -46,11 +46,18 @@ export const useReports = () => {
     }));
   }, []);
 
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
+  const handleOpenPdfModal = useCallback(() => setPdfModalOpen(true), []);
+  const handleClosePdfModal = useCallback(() => setPdfModalOpen(false), []);
+
   return {
     reportItems,
     currentMonthComparison,
     loading,
     filterParams,
+    pdfModalOpen,
+    handleOpenPdfModal,
+    handleClosePdfModal,
     handleFilterChange,
     refetch: () => fetchReports(filterParams),
   };

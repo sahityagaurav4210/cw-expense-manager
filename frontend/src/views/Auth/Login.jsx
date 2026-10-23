@@ -11,18 +11,25 @@ import {
   Link,
   InputAdornment,
   IconButton,
+  Divider,
+  useTheme,
+  Stack,
 } from "@mui/material";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useLogin } from "../../hooks/useLogin";
 import CaptchaComponent from "../../components/core/CaptchaComponent";
 import OTPWrapper from "../../components/core/OTPWrapper";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import NavbarLogo from "../../components/core/NavbarLogo";
+import { Email, Key, LoginOutlined } from "@mui/icons-material";
+import useAppCss from "../../hooks/useAppCss";
+import Notes from "../../components/core/Notes";
 
 const Login = () => {
-  const navigate = useNavigate();
+  const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
+  const { RequiredFieldCss } = useAppCss();
 
   const {
     step,
@@ -34,11 +41,13 @@ const Login = () => {
     handleSubmit,
 
     // OTP
+    twoFactorMethod,
     tempToken,
     otpEmail,
     defaultOtp,
     handleVerifiedSuccess,
     handleBackToLogin,
+    handleSwitch2faMethod,
   } = useLogin();
 
   return (
@@ -72,26 +81,22 @@ const Login = () => {
                 alignItems="center"
                 mb={3}
               >
-                <Box
-                  sx={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: "50%",
-                    bgcolor: "primary.main",
-                    color: "#fff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    mb: 1,
-                  }}
-                >
-                  <LockOutlinedIcon fontSize="medium" />
-                </Box>
+                <Divider sx={{ width: "100%" }}>
+                  <NavbarLogo
+                    alt="Expense Manager"
+                    src="/logo.png"
+                    height={96}
+                    hidePadding
+                    hideTooltip
+                  />
+                </Divider>
+
                 <Typography variant="h5" fontWeight={700} color="primary.main">
-                  User Login
+                  Expense Tracker Login
                 </Typography>
+
                 <Typography variant="body2" color="text.secondary">
-                  CW Expense Tracker Portal
+                  Please sign in to continue
                 </Typography>
               </Box>
 
@@ -108,6 +113,15 @@ const Login = () => {
                       onChange={handleChange("email")}
                       error={Boolean(errors.email)}
                       helperText={errors.email}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Email fontSize="small" />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={RequiredFieldCss}
+                      autoFocus
                     />
                   </Grid>
 
@@ -140,7 +154,13 @@ const Login = () => {
                             </IconButton>
                           </InputAdornment>
                         ),
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Key fontSize="small" />
+                          </InputAdornment>
+                        ),
                       }}
+                      sx={RequiredFieldCss}
                     />
                   </Grid>
 
@@ -155,18 +175,59 @@ const Login = () => {
                     />
                   </Grid>
 
+                  {/* Forgot Password Link */}
+                  <Grid item xs={12}>
+                    <Stack direction="column" sx={{ alignItems: "flex-end" }}>
+                      <Link
+                        component={RouterLink}
+                        to="/forgot-password"
+                        underline="hover"
+                        sx={{
+                          fontSize: "0.775rem",
+                          fontWeight: 600,
+                          color: "primary.main",
+                          transition: "color 0.15s ease-in-out",
+                          "&:hover": {
+                            color: "primary.dark",
+                          },
+                          mb: 0.5,
+                        }}
+                      >
+                        Forgot Password?
+                      </Link>
+
+                      <Link
+                        component={RouterLink}
+                        to="/register"
+                        underline="hover"
+                        sx={{
+                          fontSize: "0.775rem",
+                          fontWeight: 600,
+                          color: "primary.main",
+                          transition: "color 0.15s ease-in-out",
+                          "&:hover": {
+                            color: "primary.dark",
+                          },
+                        }}
+                      >
+                        Don't have an account? Register Here
+                      </Link>
+                    </Stack>
+                  </Grid>
+
                   {/* Submit */}
                   <Grid item xs={12} mt={1}>
                     <Button
                       type="submit"
                       variant="contained"
                       color="primary"
-                      fullWidth
                       disabled={loading}
                       startIcon={
                         loading ? (
                           <CircularProgress size={18} color="inherit" />
-                        ) : null
+                        ) : (
+                          <LoginOutlined />
+                        )
                       }
                     >
                       {loading ? "Signing in..." : "Login"}
@@ -175,19 +236,12 @@ const Login = () => {
                 </Grid>
               </Box>
 
-              <Box display="flex" justifyContent="center" mt={3}>
-                <Typography variant="body2" color="text.secondary">
-                  Don't have an account?{" "}
-                  <Link
-                    component="button"
-                    type="button"
-                    onClick={() => navigate("/register")}
-                    sx={{ fontWeight: 700 }}
-                  >
-                    Register Here
-                  </Link>
-                </Typography>
-              </Box>
+              <Divider sx={{ my: 1 }} />
+
+              <Notes
+                note="All fields marked with asterisk (*) are mandatory to fill."
+                noteColor={theme.palette.secondary.main}
+              />
             </>
           ) : (
             /* STEP 2: TWO-FACTOR AUTHENTICATION VIA OTPWRAPPER */
@@ -195,6 +249,8 @@ const Login = () => {
               email={otpEmail}
               tempToken={tempToken}
               defaultOtp={defaultOtp}
+              twoFactorMethod={twoFactorMethod}
+              onSwitchMethod={handleSwitch2faMethod}
               onChangeAccount={handleBackToLogin}
               onVerified={handleVerifiedSuccess}
             />

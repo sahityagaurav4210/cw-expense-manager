@@ -32,6 +32,7 @@ import Terms from "./components/docs/Terms";
 import PrivacyPolicy from "./components/docs/LegalPrivacy";
 import Register from "./views/Auth/Register";
 import Login from "./views/Auth/Login";
+import ForgotPassword from "./views/Auth/ForgotPassword";
 import CategoryManager from "./views/Category/CategoryManager";
 import BudgetAllocation from "./views/Budget/BudgetAllocation";
 import ExpenseManager from "./views/Expense/ExpenseManager";
@@ -154,7 +155,9 @@ const MainLayout = () => {
   };
 
   const isAuthPage =
-    location.pathname === "/login" || location.pathname === "/register";
+    location.pathname === "/login" ||
+    location.pathname === "/register" ||
+    location.pathname === "/forgot-password";
   const isDocPage =
     location.pathname === "/terms" || location.pathname === "/privacy";
 
@@ -252,6 +255,7 @@ const MainLayout = () => {
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route
                 path="/terms"
                 element={<Terms onBack={() => navigate(-1)} />}

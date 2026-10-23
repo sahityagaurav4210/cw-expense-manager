@@ -28,3 +28,43 @@ export const logoutUserApi = async () => {
   const response = await axiosInstance.post("/auth/logout");
   return response.data;
 };
+
+export const switchLogin2faMethodApi = async ({ tempToken }) => {
+  const response = await axiosInstance.post("/auth/switch-2fa", { tempToken });
+  return response.data;
+};
+
+export const forgotPasswordSendOtpApi = async ({ email, captcha, captchaId }) => {
+  const response = await axiosInstance.post("/auth/forgot-password/send-otp", {
+    email,
+    captcha,
+    captchaId,
+  });
+  return response.data;
+};
+
+export const forgotPasswordVerifyOtpApi = async ({ resetToken, otp }) => {
+  const response = await axiosInstance.post("/auth/forgot-password/verify-otp", {
+    resetToken,
+    otp,
+  });
+  return response.data;
+};
+
+export const forgotPasswordResendOtpApi = async ({ resetToken, captchaText, captchaId }) => {
+  const response = await axiosInstance.post("/auth/forgot-password/resend-otp", {
+    resetToken,
+    captchaText,
+    captchaId,
+  });
+  return response.data;
+};
+
+export const forgotPasswordResetApi = async ({ resetToken, password, confirmPassword }) => {
+  const response = await axiosInstance.post("/auth/forgot-password/reset-password", {
+    resetToken,
+    password,
+    confirmPassword,
+  });
+  return response.data;
+};

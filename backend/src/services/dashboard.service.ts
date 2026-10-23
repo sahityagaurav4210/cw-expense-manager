@@ -1,4 +1,4 @@
-import { Expense, Budget, Category, Debt } from "../models";
+import { Expense, Budget, Category, Debt, User, BudgetInflow } from "../models";
 import dayjs from "dayjs";
 
 export class DashboardService {
@@ -6,6 +6,21 @@ export class DashboardService {
     const targetMonth = monthYear || dayjs().format("YYYY-MM");
     const startOfMonth = `${targetMonth}-01`;
     const endOfMonth = dayjs(startOfMonth).endOf("month").format("YYYY-MM-DD");
+    const daysInMonth = dayjs(startOfMonth).daysInMonth() || 30;
+
+    // Fetch user details for report branding
+    const userRecord = await User.findByPk(userId, {
+      attributes: ["id", "name", "email", "employment_type", "phone_no", "annual_income"],
+    });
+    const userProfile = userRecord
+      ? {
+          name: userRecord.name,
+          email: userRecord.email,
+          employment_type: userRecord.employment_type,
+          phone_no: userRecord.phone_no,
+          annual_income: userRecord.annual_income !== null && userRecord.annual_income !== undefined ? Number(userRecord.annual_income) : null,
+        }
+      : null;
 
     // Fetch user's latest budget
     const budgetRecord = await Budget.findOne({
@@ -30,11 +45,25 @@ export class DashboardService {
       return expDate === targetMonth;
     });
 
-    const totalExpenseIncurred = monthlyExpenses.reduce(
-      (sum, e) => sum + parseFloat(e.amount as any),
-      0,
-    );
-    const amountMoneyLeft = Math.max(0, monthlyIncome - totalExpenseIncurred);
+    let totalExpenseIncurred = 0;
+    let fixedExpensesTotal = 0;
+    let variableExpensesTotal = 0;
+
+    monthlyExpenses.forEach((e) => {
+      const amt = parseFloat(e.amount as any);
+      totalExpenseIncurred += amt;
+      if (e.type === "Fixed") {
+        fixedExpensesTotal += amt;
+      } else {
+        variableExpensesTotal += amt;
+      }
+    });
+
+    totalExpenseIncurred = parseFloat(totalExpenseIncurred.toFixed(2));
+    fixedExpensesTotal = parseFloat(fixedExpensesTotal.toFixed(2));
+    variableExpensesTotal = parseFloat(variableExpensesTotal.toFixed(2));
+
+    const amountMoneyLeft = Math.max(0, parseFloat((monthlyIncome - totalExpenseIncurred).toFixed(2)));
 
     // Group expenses by category
     const categoryBreakdownMap: { [key: string]: number } = {};
@@ -46,7 +75,7 @@ export class DashboardService {
 
     const categoryBreakdown = Object.keys(categoryBreakdownMap).map((cat) => ({
       category: cat,
-      amount: categoryBreakdownMap[cat],
+      amount: parseFloat(categoryBreakdownMap[cat].toFixed(2)),
       percentage:
         totalExpenseIncurred > 0
           ? parseFloat(
@@ -56,12 +85,52 @@ export class DashboardService {
               ).toFixed(2),
             )
           : 0,
-    }));
+    })).sort((a, b) => b.amount - a.amount);
+
+    // Detailed Itemized Expenses List (Sorted latest to earliest)
+    const expensesList = monthlyExpenses
+      .sort((a, b) => {
+        const dateA = a.expense_date || a.created_at;
+        const dateB = b.expense_date || b.created_at;
+        return dayjs(dateB).valueOf() - dayjs(dateA).valueOf();
+      })
+      .map((e) => ({
+        id: e.id,
+        name: e.name,
+        amount: parseFloat(e.amount as any),
+        type: e.type,
+        category: (e as any).Category?.name || "General",
+        expense_date: e.expense_date || dayjs(e.created_at).format("YYYY-MM-DD"),
+        hasReceipt: Boolean(e.bill_url),
+        bill_url: e.bill_url,
+      }));
+
+    // Inflows for target month
+    const allInflows = await BudgetInflow.findAll({
+      where: { user_id: userId },
+      order: [["received_date", "DESC"]],
+    }).catch(() => []);
+
+    const monthlyInflows = (allInflows || [])
+      .filter((inf) => {
+        const infDate = inf.received_date
+          ? dayjs(inf.received_date).format("YYYY-MM")
+          : dayjs(inf.created_at).format("YYYY-MM");
+        return infDate === targetMonth;
+      })
+      .map((inf) => ({
+        id: inf.id,
+        source: inf.source,
+        amount: parseFloat(inf.amount as any),
+        received_date: inf.received_date || dayjs(inf.created_at).format("YYYY-MM-DD"),
+        notes: inf.notes,
+      }));
 
     // Fetch user debts & receivables for KPI metrics
     const debts = await Debt.findAll({
       where: { user_id: userId },
-    });
+      order: [["lent_date", "DESC"]],
+    }).catch(() => []);
 
     const today = dayjs().format("YYYY-MM-DD");
     let totalLent = 0;
@@ -72,7 +141,7 @@ export class DashboardService {
     let totalPendingPayable = 0;
     let overdueReceivablesCount = 0;
 
-    debts.forEach((d) => {
+    const debtsList = (debts || []).map((d) => {
       const initial = parseFloat(String(d.initial_amount || 0));
       const settled = parseFloat(String(d.settled_amount || 0));
       const balance = Math.max(0, parseFloat((initial - settled).toFixed(2)));
@@ -97,6 +166,20 @@ export class DashboardService {
           totalPendingPayable += balance;
         }
       }
+
+      return {
+        id: d.id,
+        type: d.type,
+        person_name: d.person_name,
+        contact_info: d.contact_info,
+        initial_amount: initial,
+        settled_amount: settled,
+        balance,
+        lent_date: d.lent_date,
+        due_date: d.due_date,
+        status: d.status,
+        isOverdue,
+      };
     });
 
     const debtsSummary = {
@@ -109,19 +192,44 @@ export class DashboardService {
       overdueReceivablesCount,
     };
 
+    // Financial Analytics
+    const budgetUsagePercent =
+      monthlyIncome > 0
+        ? parseFloat(((totalExpenseIncurred / monthlyIncome) * 100).toFixed(1))
+        : 0;
+
+    const savingsRate =
+      monthlyIncome > 0
+        ? parseFloat(((amountMoneyLeft / monthlyIncome) * 100).toFixed(1))
+        : 0;
+
+    const dailyAverageExpense = parseFloat((totalExpenseIncurred / daysInMonth).toFixed(2));
+
     return {
       monthlyIncome,
       totalExpenseIncurred,
       amountMoneyLeft,
+      fixedExpensesTotal,
+      variableExpensesTotal,
       targetMonth,
       categoryBreakdown,
       expenseCount: monthlyExpenses.length,
+      expensesList,
+      monthlyInflows,
+      debtsList,
+      userProfile,
       budgetDateRange: budgetRecord
         ? { from: budgetRecord.from_date, to: budgetRecord.to_date }
         : null,
       pendingReceivables: parseFloat(totalPendingReceivable.toFixed(2)),
       pendingPayables: parseFloat(totalPendingPayable.toFixed(2)),
       debtsSummary,
+      analytics: {
+        budgetUsagePercent,
+        savingsRate,
+        dailyAverageExpense,
+        daysInMonth,
+      },
     };
   }
 }

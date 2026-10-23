@@ -12,19 +12,29 @@ import {
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { useReports } from "../../hooks/useReports";
 import { useDurationFilter } from "../../hooks/useDurationFilter";
 import { useGraphView } from "../../hooks/useGraphView";
 import ExpenditureCard from "../../components/reports/ExpenditureCard";
 import DurationFilter from "../../components/reports/DurationFilter";
 import GraphViewDialog from "../../components/dialogs/GraphViewDialog";
+import ExportPdfDialog from "../../components/reports/ExportPdfDialog";
 import useAppCss from "../../hooks/css/useAppCss";
 
 const ReportsView = () => {
   const { GlobalPaperCss } = useAppCss();
 
   // 1. Core Reports Data Hook
-  const { reportItems, loading, handleFilterChange, refetch } = useReports();
+  const {
+    reportItems,
+    loading,
+    pdfModalOpen,
+    handleOpenPdfModal,
+    handleClosePdfModal,
+    handleFilterChange,
+    refetch,
+  } = useReports();
 
   // 2. Duration Filter Hook
   const {
@@ -102,7 +112,7 @@ const ReportsView = () => {
         </Box>
 
         {/* Action Controls */}
-        <Stack direction="row" spacing={1.5} alignItems="center">
+        <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap">
           <Button
             variant="outlined"
             size="medium"
@@ -112,6 +122,17 @@ const ReportsView = () => {
             sx={{ fontWeight: 600, textTransform: "none" }}
           >
             Refresh
+          </Button>
+
+          <Button
+            variant="outlined"
+            color="primary"
+            size="medium"
+            onClick={handleOpenPdfModal}
+            startIcon={<PictureAsPdfIcon />}
+            sx={{ fontWeight: 700, textTransform: "none" }}
+          >
+            Export PDF Report
           </Button>
 
           {/* Graph View Button at top right corner */}
@@ -197,6 +218,12 @@ const ReportsView = () => {
         graphType={graphType}
         onGraphTypeChange={handleGraphTypeChange}
         durationFilterComponent={durationFilterElement}
+      />
+
+      {/* PDF Export Modal */}
+      <ExportPdfDialog
+        open={pdfModalOpen}
+        onClose={handleClosePdfModal}
       />
     </Paper>
   );

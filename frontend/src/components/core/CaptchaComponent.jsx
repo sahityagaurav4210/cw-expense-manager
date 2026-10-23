@@ -9,6 +9,7 @@ import {
 import RefreshIcon from "@mui/icons-material/Refresh";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import SecurityIcon from "@mui/icons-material/Security";
+import useAppCss from "../../hooks/useAppCss";
 
 const CAPTCHA_SERVICE_URL = "http://localhost:11905";
 
@@ -33,6 +34,7 @@ const CaptchaComponent = ({
   const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
   const isFetchingRef = useRef(false);
+  const { RequiredFieldCss } = useAppCss();
 
   const drawFallbackCaptcha = (code) => {
     const canvas = canvasRef.current;
@@ -149,7 +151,13 @@ const CaptchaComponent = ({
   };
 
   return (
-    <Box ref={wrapperRef} display="flex" flexDirection="column" gap={1} width="100%">
+    <Box
+      ref={wrapperRef}
+      display="flex"
+      flexDirection="column"
+      gap={1}
+      width="100%"
+    >
       <Box display="flex" alignItems="center" gap={1.5}>
         <Box
           sx={{
@@ -217,6 +225,7 @@ const CaptchaComponent = ({
             <SecurityIcon fontSize="small" color="action" sx={{ mr: 1 }} />
           ),
         }}
+        sx={RequiredFieldCss}
       />
     </Box>
   );

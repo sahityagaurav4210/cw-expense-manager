@@ -27,8 +27,30 @@ export const registerSchema = Joi.object({
         "Password must be 8-25 characters long, contain at least one uppercase letter, one lowercase letter, and one special character.",
     }),
   employment_type: Joi.string().valid("Salaried", "Self-Employed").required(),
+  annual_income: Joi.alternatives()
+    .try(
+      Joi.number().min(0).max(999999999999.99),
+      Joi.string().allow("", null).regex(/^\d+(\.\d{1,2})?$/)
+    )
+    .allow("", null)
+    .optional(),
   captcha: Joi.string().max(8).required(),
   captchaId: Joi.number().allow("", null).optional(),
+  isTermsAccepted: Joi.boolean()
+    .truthy("true", "1", 1)
+    .falsy("false", "0", 0)
+    .valid(true)
+    .required()
+    .messages({
+      "any.only": "You must agree to the Terms & Conditions to register.",
+      "any.required": "You must agree to the Terms & Conditions to register.",
+      "boolean.base": "You must agree to the Terms & Conditions to register.",
+    }),
+  is_terms_accepted: Joi.boolean()
+    .truthy("true", "1", 1)
+    .falsy("false", "0", 0)
+    .valid(true)
+    .optional(),
 });
 
 export const loginSchema = Joi.object({
@@ -59,6 +81,61 @@ export const resendOtpSchema = Joi.object({
   captcha: Joi.string().allow("", null).optional(),
   captchaId: Joi.alternatives().try(Joi.number(), Joi.string()).allow("", null).optional(),
 }).unknown(true);
+
+export const forgotPasswordSendOtpSchema = Joi.object({
+  email: Joi.string().email().max(32).required().messages({
+    "string.email": "Please enter a valid email address.",
+    "string.empty": "Email is required.",
+    "any.required": "Email is required.",
+  }),
+  captcha: Joi.string().allow("", null).optional(),
+  captchaId: Joi.alternatives().try(Joi.number(), Joi.string()).allow("", null).optional(),
+}).unknown(true);
+
+export const forgotPasswordVerifyOtpSchema = Joi.object({
+  resetToken: Joi.string().required().messages({
+    "string.empty": "Reset token is required.",
+    "any.required": "Reset token is required.",
+  }),
+  otp: Joi.string().trim().length(6).required().messages({
+    "string.empty": "OTP is required.",
+    "string.length": "OTP must be exactly 6 digits.",
+    "any.required": "OTP is required.",
+  }),
+});
+
+export const forgotPasswordResendOtpSchema = Joi.object({
+  resetToken: Joi.string().required().messages({
+    "string.empty": "Reset token is required.",
+    "any.required": "Reset token is required.",
+  }),
+  captchaText: Joi.string().allow("", null).optional(),
+  captcha: Joi.string().allow("", null).optional(),
+  captchaId: Joi.alternatives().try(Joi.number(), Joi.string()).allow("", null).optional(),
+}).unknown(true);
+
+export const forgotPasswordResetSchema = Joi.object({
+  resetToken: Joi.string().required().messages({
+    "string.empty": "Reset token is required.",
+    "any.required": "Reset token is required.",
+  }),
+  password: Joi.string()
+    .min(8)
+    .max(25)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,25}$/)
+    .required()
+    .messages({
+      "string.pattern.base":
+        "Password must be 8-25 characters long, contain at least one uppercase letter, one lowercase letter, and one special character.",
+      "string.empty": "Password is required.",
+      "any.required": "Password is required.",
+    }),
+  confirmPassword: Joi.string().required().valid(Joi.ref("password")).messages({
+    "any.only": "Passwords do not match.",
+    "string.empty": "Confirm Password is required.",
+    "any.required": "Confirm Password is required.",
+  }),
+});
 
 export const categorySchema = Joi.object({
   name: Joi.string()
@@ -196,6 +273,13 @@ export const updateProfileSchema = Joi.object({
         "Only valid 10-digit Indian phone numbers starting with 6-9 are allowed.",
     }),
   employment_type: Joi.string().valid("Salaried", "Self-Employed"),
+  annual_income: Joi.alternatives()
+    .try(
+      Joi.number().min(0).max(999999999999.99),
+      Joi.string().allow("", null).regex(/^\d+(\.\d{1,2})?$/)
+    )
+    .allow("", null)
+    .optional(),
   captchaText: Joi.string().required(),
   captchaId: Joi.number().allow("", null).optional(),
 }).unknown(true);

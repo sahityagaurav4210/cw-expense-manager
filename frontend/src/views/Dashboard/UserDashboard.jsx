@@ -11,10 +11,6 @@ import {
   Button,
   Stack,
   Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   ToggleButtonGroup,
   ToggleButton,
   useMediaQuery,
@@ -24,7 +20,6 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SavingsIcon from "@mui/icons-material/Savings";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import PieChartIcon from "@mui/icons-material/PieChart";
 import HandshakeIcon from "@mui/icons-material/Handshake";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
@@ -32,9 +27,6 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { useDashboard } from "../../hooks/useDashboard";
-import PDFViewer from "../../components/core/PDFViewer";
-import PaperComponent from "../../components/core/PaperComponent";
-import AppDialogTitle from "../../components/core/AppDialogTitle";
 import useAppCss from "../../hooks/css/useAppCss";
 import TopDownAnimation from "../../components/animation/TopDownAnimation";
 import { Wallet } from "@mui/icons-material";
@@ -57,10 +49,7 @@ const UserDashboard = () => {
   const {
     selectedMonth,
     metrics,
-    pdfModalOpen,
     handleMonthChange,
-    handleOpenPdfModal,
-    handleClosePdfModal,
   } = useDashboard();
 
   const monthlyIncome = metrics?.monthlyIncome || 0;
@@ -99,111 +88,6 @@ const UserDashboard = () => {
       ? Math.min(100, Math.round((totalExpense / monthlyIncome) * 100))
       : 0;
 
-  const htmlReport = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>Monthly Financial Report - ${selectedMonth}</title>
-      <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; }
-        .header { text-align: center; border-bottom: 3px solid #1976d2; padding-bottom: 20px; margin-bottom: 30px; }
-        .header h1 { margin: 0; color: #1976d2; font-size: 28px; text-transform: uppercase; letter-spacing: 1px; }
-        .header p { margin: 5px 0 0; color: #666; font-size: 14px; }
-        .summary-box { background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px; border-left: 5px solid #1976d2; }
-        .summary-box h2 { margin-top: 0; font-size: 20px; color: #1976d2; }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px dashed #ccc; padding-bottom: 8px; }
-        .stat-label { font-weight: bold; color: #555; }
-        .stat-value { font-weight: bold; color: #111; }
-        .value-green { color: #2e7d32; }
-        .value-red { color: #d32f2f; }
-        .value-purple { color: #7c3aed; }
-        .value-orange { color: #ea580c; }
-        .category-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .category-table th { background: #1976d2; color: white; padding: 12px; text-align: left; }
-        .category-table td { padding: 12px; border-bottom: 1px solid #ddd; }
-        .category-table tr:nth-child(even) { background-color: #f9f9f9; }
-        .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px; }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>CW Expense Tracker</h1>
-        <p>Monthly Financial Report - <strong>${selectedMonth}</strong></p>
-        <p>Generated Date: ${dayjs().format("YYYY-MM-DD HH:mm")}</p>
-      </div>
-
-      <div class="summary-box">
-        <h2>Financial Summary</h2>
-        <div class="stat-row">
-          <span class="stat-label">Monthly Income Allocated:</span>
-          <span class="stat-value">₹${monthlyIncome.toLocaleString("en-IN")}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Total Incurred Expense:</span>
-          <span class="stat-value value-red">₹${totalExpense.toLocaleString("en-IN")}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Remaining Money Left:</span>
-          <span class="stat-value value-green">₹${moneyLeft.toLocaleString("en-IN")}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Pending Receivables (Money Lent):</span>
-          <span class="stat-value value-purple">₹${pendingReceivables.toLocaleString("en-IN")}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Pending Payables (Money Borrowed):</span>
-          <span class="stat-value value-orange">₹${pendingPayables.toLocaleString("en-IN")}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Money Lent Recovery Rate:</span>
-          <span class="stat-value value-purple">${debtRecoveryPercent}% (₹${totalRecovered.toLocaleString("en-IN")} of ₹${totalLent.toLocaleString("en-IN")})</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Money Borrowed Repayment Rate:</span>
-          <span class="stat-value value-orange">${borrowedRepaidPercent}% (₹${totalRepaid.toLocaleString("en-IN")} of ₹${totalBorrowed.toLocaleString("en-IN")})</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Budget Consumption Rate:</span>
-          <span class="stat-value ${budgetUsagePercent > 90 ? "value-red" : "value-green"}">${budgetUsagePercent}%</span>
-        </div>
-      </div>
-
-      <h2>Category Breakdown</h2>
-      <table class="category-table">
-        <thead>
-          <tr>
-            <th>Category Name</th>
-            <th>Amount Spent (₹)</th>
-            <th>% of Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${
-            categoryBreakdown.length > 0
-              ? categoryBreakdown
-                  .map(
-                    (c) => `
-              <tr>
-                <td><strong>${c.category}</strong></td>
-                <td>₹${c.amount.toLocaleString("en-IN")}</td>
-                <td>${c.percentage}%</td>
-              </tr>
-            `,
-                  )
-                  .join("")
-              : '<tr><td colspan="3" style="text-align: center;">No expenses recorded</td></tr>'
-          }
-        </tbody>
-      </table>
-
-      <div class="footer">
-        Confidential Report • Generated by CW Expense Tracker
-      </div>
-    </body>
-    </html>
-  `;
-
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   return (
@@ -238,16 +122,6 @@ const UserDashboard = () => {
           fullWidth={isMobile}
           InputLabelProps={{ shrink: true }}
         />
-
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<PictureAsPdfIcon />}
-          onClick={handleOpenPdfModal}
-          sx={{ fontWeight: 700, textTransform: "none" }}
-        >
-          Export PDF Report
-        </Button>
       </Stack>
 
       {/* Dashboard View Switcher - Hidden on smaller/mobile devices */}
@@ -881,36 +755,6 @@ const UserDashboard = () => {
           </Paper>
         </>
       )}
-
-      {/* PDF Export Modal */}
-      <Dialog
-        open={pdfModalOpen}
-        onClose={handleClosePdfModal}
-        maxWidth="md"
-        fullWidth
-        PaperComponent={PaperComponent}
-      >
-        <AppDialogTitle
-          title="Monthly Financial Report Preview"
-          onClose={handleClosePdfModal}
-          Icon={<PictureAsPdfIcon sx={{ color: "white" }} />}
-        />
-        <DialogContent dividers>
-          <PDFViewer
-            pdfData={new Blob([htmlReport], { type: "text/html" })}
-            title={`Report-${selectedMonth}`}
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button
-            onClick={handleClosePdfModal}
-            variant="contained"
-            color="primary"
-          >
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Paper>
   );
 };

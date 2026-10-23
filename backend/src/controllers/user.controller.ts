@@ -36,7 +36,17 @@ export class UserController {
       }
 
       const user = await User.findByPk(userId, {
-        attributes: ["id", "name", "email", "phone_no", "employment_type", "profile_photo_url"],
+        attributes: [
+          "id",
+          "name",
+          "email",
+          "phone_no",
+          "employment_type",
+          "annual_income",
+          "profile_photo_url",
+          "two_factor_method",
+          "is_authenticator_enabled",
+        ],
       });
 
       if (!user) {
@@ -54,7 +64,10 @@ export class UserController {
             email: user.email,
             phone_no: user.phone_no,
             employment_type: user.employment_type,
+            annual_income: user.annual_income !== null && user.annual_income !== undefined ? Number(user.annual_income) : null,
             profile_photo_url: user.profile_photo_url,
+            two_factor_method: user.two_factor_method || "EMAIL",
+            is_authenticator_enabled: Boolean(user.is_authenticator_enabled),
           },
           accessToken,
         },
@@ -89,6 +102,68 @@ export class UserController {
       const profilePhotoUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
       const updatedProfile = await UserService.updateProfile(userId, value, profilePhotoUrl);
       return res.status(200).json({ status: "success", message: "Profile updated successfully", data: updatedProfile });
+    } catch (err) {
+      return res.status(400).json({ status: "error", message: (err as Error).message });
+    }
+  }
+
+  public static async get2FaSettings(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) return res.status(401).json({ status: "error", message: "Unauthorized" });
+
+      const settings = await UserService.get2FaSettings(userId);
+      return res.status(200).json({ status: "success", data: settings });
+    } catch (err) {
+      return res.status(400).json({ status: "error", message: (err as Error).message });
+    }
+  }
+
+  public static async setupAuthenticator(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) return res.status(401).json({ status: "error", message: "Unauthorized" });
+
+      const setupData = await UserService.setupAuthenticator(userId);
+      return res.status(200).json({ status: "success", data: setupData });
+    } catch (err) {
+      return res.status(400).json({ status: "error", message: (err as Error).message });
+    }
+  }
+
+  public static async verifyAuthenticatorSetup(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) return res.status(401).json({ status: "error", message: "Unauthorized" });
+
+      const { code, setAsDefault } = req.body;
+      const result = await UserService.verifyAuthenticatorSetup(userId, code, Boolean(setAsDefault));
+      return res.status(200).json({ status: "success", message: result.message, data: result });
+    } catch (err) {
+      return res.status(400).json({ status: "error", message: (err as Error).message });
+    }
+  }
+
+  public static async update2FaMethod(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) return res.status(401).json({ status: "error", message: "Unauthorized" });
+
+      const { method } = req.body;
+      const result = await UserService.update2FaMethod(userId, method);
+      return res.status(200).json({ status: "success", message: result.message, data: result });
+    } catch (err) {
+      return res.status(400).json({ status: "error", message: (err as Error).message });
+    }
+  }
+
+  public static async disableAuthenticator(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) return res.status(401).json({ status: "error", message: "Unauthorized" });
+
+      const result = await UserService.disableAuthenticator(userId);
+      return res.status(200).json({ status: "success", message: result.message, data: result });
     } catch (err) {
       return res.status(400).json({ status: "error", message: (err as Error).message });
     }

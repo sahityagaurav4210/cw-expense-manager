@@ -71,11 +71,18 @@ function useAppCss() {
     [theme],
   );
 
+  const RequiredFieldCss = useMemo(() => ({
+    "& .MuiInputLabel-asterisk": {
+      color: "red",
+    },
+  }));
+
   return {
     GlobalTableCss,
     GlobalPaperCss,
     GlobalDialogTitle,
     GlobalDialogDividerCss,
+    RequiredFieldCss,
   };
 }
 

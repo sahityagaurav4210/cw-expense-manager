@@ -13,7 +13,9 @@ export const useRegister = () => {
     phone_no: "",
     password: "",
     employment_type: "Salaried",
+    annual_income: "",
     captcha: "",
+    isTermsAccepted: false,
   });
   const [captchaId, setCaptchaId] = useState("");
   const [profilePhoto, setProfilePhoto] = useState(null);
@@ -29,6 +31,16 @@ export const useRegister = () => {
 
   const handleSelectEmployment = (type) => () => {
     setFormData((prev) => ({ ...prev, employment_type: type }));
+  };
+
+  const handleToggleTerms = () => {
+    setFormData((prev) => {
+      const nextVal = !prev.isTermsAccepted;
+      if (nextVal && errors.isTermsAccepted) {
+        setErrors((prevErrs) => ({ ...prevErrs, isTermsAccepted: null }));
+      }
+      return { ...prev, isTermsAccepted: nextVal };
+    });
   };
 
   const handleFileSelect = (file) => {
@@ -86,6 +98,7 @@ export const useRegister = () => {
     loading,
     handleChange,
     handleSelectEmployment,
+    handleToggleTerms,
     handleFileSelect,
     handleFileClear,
     handleSubmit,
