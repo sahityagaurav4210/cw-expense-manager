@@ -6,6 +6,6 @@ build/
 logs/
 uploads/
 requests.log
-target/
+api-gateway/target/
 .idea/
 application-local.yml
