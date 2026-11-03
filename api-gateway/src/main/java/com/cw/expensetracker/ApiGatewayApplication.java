@@ -11,6 +11,6 @@ public class ApiGatewayApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ApiGatewayApplication.class, args);
-        logger.info("Spring Boot API Gateway initialized successfully on port 8080");
+        logger.info("Spring Boot API Gateway initialized successfully.");
     }
 }

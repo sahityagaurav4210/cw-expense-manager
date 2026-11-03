@@ -8,3 +8,4 @@ uploads/
 requests.log
 target/
 .idea/
+application-local.yml
