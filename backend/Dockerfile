@@ -11,8 +11,9 @@ COPY . .
 
 RUN npm run build && \
     rm -rf src tsconfig.json && \
-    mkdir logs uploads && \
-    chown -R node:node /apps
+    mkdir -p logs uploads && \
+    chown -R node:node /apps/logs /apps/uploads && \
+    chown node:node /apps
 
 USER node
 
