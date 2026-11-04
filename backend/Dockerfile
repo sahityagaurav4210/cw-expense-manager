@@ -9,7 +9,7 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build && rm -rf src tsconfig.json && mkdir logs && chown node:node logs uploads templates
+RUN npm run build && rm -rf src tsconfig.json && mkdir logs uploads && chown node:node logs uploads templates
 
 USER node
 
