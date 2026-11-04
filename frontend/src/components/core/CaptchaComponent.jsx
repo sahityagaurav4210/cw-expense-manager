@@ -1,17 +1,11 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import {
-  Box,
-  TextField,
-  IconButton,
-  Tooltip,
-  CircularProgress,
-} from "@mui/material";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import SecurityIcon from "@mui/icons-material/Security";
-import useAppCss from "../../hooks/useAppCss";
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Box, TextField, IconButton, Tooltip, CircularProgress } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import SecurityIcon from '@mui/icons-material/Security';
+import useAppCss from '../../hooks/useAppCss';
 
-const CAPTCHA_SERVICE_URL = "http://localhost:11905";
+const CAPTCHA_SERVICE_URL = import.meta.env.VITE_CAPTCHA_SERVICE_URL || 'http://localhost:11905';
 
 /**
  * Plug-and-play CAPTCHA component connecting to Captcha Service (http://localhost:11905)
@@ -24,13 +18,13 @@ const CaptchaComponent = ({
   onCaptchaIdChange,
   disabled = false,
   error = false,
-  helperText = "",
-  name = "",
+  helperText = '',
+  name = '',
 }) => {
-  const [captchaId, setCaptchaId] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [captchaId, setCaptchaId] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
-  const [fallbackCode, setFallbackCode] = useState("");
+  const [fallbackCode, setFallbackCode] = useState('');
   const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
   const isFetchingRef = useRef(false);
@@ -39,13 +33,13 @@ const CaptchaComponent = ({
   const drawFallbackCaptcha = (code) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Background gradient
     const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
-    grad.addColorStop(0, "#f1f5f9");
-    grad.addColorStop(1, "#cbd5e1");
+    grad.addColorStop(0, '#f1f5f9');
+    grad.addColorStop(1, '#cbd5e1');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -60,7 +54,7 @@ const CaptchaComponent = ({
 
     // Text
     ctx.font = "bold 20px 'Courier New', monospace";
-    ctx.fillStyle = "#000080";
+    ctx.fillStyle = '#000080';
     for (let i = 0; i < code.length; i++) {
       ctx.save();
       ctx.translate(18 * i + 15, 24);
@@ -78,16 +72,13 @@ const CaptchaComponent = ({
       const res = await fetch(`${CAPTCHA_SERVICE_URL}/api/v1/captcha/generate`);
       if (res.ok) {
         const data = await res.json();
-        const cid =
-          data?.details?.details?.captchaId ||
-          data?.details?.captchaId ||
-          String(Date.now());
+        const cid = data?.details?.details?.captchaId || data?.details?.captchaId || String(Date.now());
         setCaptchaId(cid);
         if (onCaptchaIdChange) onCaptchaIdChange(cid);
         setImageUrl(`${CAPTCHA_SERVICE_URL}/api/v1/captcha/image/${cid}`);
-        setFallbackCode("");
+        setFallbackCode('');
       } else {
-        throw new Error("Captcha service responded with error");
+        throw new Error('Captcha service responded with error');
       }
     } catch {
       // Offline fallback
@@ -96,7 +87,7 @@ const CaptchaComponent = ({
       setFallbackCode(code);
       setCaptchaId(cid);
       if (onCaptchaIdChange) onCaptchaIdChange(cid);
-      setImageUrl("");
+      setImageUrl('');
       setTimeout(() => drawFallbackCaptcha(code), 50);
     } finally {
       setLoading(false);
@@ -124,85 +115,61 @@ const CaptchaComponent = ({
 
       generateCaptcha();
       if (onChange) {
-        onChange({ target: { value: "" } });
+        onChange({ target: { value: '' } });
       }
     };
 
-    if (typeof window !== "undefined") {
-      window.addEventListener("cw-api-error", handleApiError);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('cw-api-error', handleApiError);
       return () => {
-        window.removeEventListener("cw-api-error", handleApiError);
+        window.removeEventListener('cw-api-error', handleApiError);
       };
     }
   }, [disabled, generateCaptcha, onChange]);
 
   const handleAudioPlay = () => {
     if (captchaId && imageUrl) {
-      const audio = new Audio(
-        `${CAPTCHA_SERVICE_URL}/api/v1/captcha/audio/${captchaId}`,
-      );
+      const audio = new Audio(`${CAPTCHA_SERVICE_URL}/api/v1/captcha/audio/${captchaId}`);
       audio.play().catch(() => {});
     } else if (fallbackCode) {
-      const utterance = new SpeechSynthesisUtterance(
-        fallbackCode.split("").join(" "),
-      );
+      const utterance = new SpeechSynthesisUtterance(fallbackCode.split('').join(' '));
       window.speechSynthesis.speak(utterance);
     }
   };
 
   return (
-    <Box
-      ref={wrapperRef}
-      display="flex"
-      flexDirection="column"
-      gap={1}
-      width="100%"
-    >
+    <Box ref={wrapperRef} display="flex" flexDirection="column" gap={1} width="100%">
       <Box display="flex" alignItems="center" gap={1.5}>
         <Box
           sx={{
             borderRadius: 1.5,
             my: 1,
-            border: "1px solid gainsboro",
-            overflow: "hidden",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: "#f8fafc",
-            position: "relative",
+            border: '1px solid gainsboro',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: '#f8fafc',
+            position: 'relative',
           }}
         >
           {loading ? (
             <CircularProgress size={20} />
           ) : imageUrl ? (
-            <img
-              src={imageUrl}
-              alt="CAPTCHA"
-              style={{ width: "100%", height: "100%", objectFit: "contain" }}
-            />
+            <img src={imageUrl} alt="CAPTCHA" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           ) : (
             <canvas ref={canvasRef} width={140} height={40} />
           )}
         </Box>
 
         <Tooltip title="Refresh CAPTCHA">
-          <IconButton
-            size="small"
-            onClick={generateCaptcha}
-            disabled={loading || disabled}
-            color="primary"
-          >
+          <IconButton size="small" onClick={generateCaptcha} disabled={loading || disabled} color="primary">
             <RefreshIcon fontSize="small" />
           </IconButton>
         </Tooltip>
 
         <Tooltip title="Audio CAPTCHA">
-          <IconButton
-            size="small"
-            onClick={handleAudioPlay}
-            disabled={loading || disabled}
-            color="secondary"
-          >
+          <IconButton size="small" onClick={handleAudioPlay} disabled={loading || disabled} color="secondary">
             <VolumeUpIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -215,15 +182,13 @@ const CaptchaComponent = ({
         name={name}
         disabled={disabled}
         error={error}
-        helperText={helperText || "Enter the characters shown above"}
+        helperText={helperText || 'Enter the characters shown above'}
         inputProps={{ maxLength: 8 }}
         size="small"
         fullWidth
         required
         InputProps={{
-          startAdornment: (
-            <SecurityIcon fontSize="small" color="action" sx={{ mr: 1 }} />
-          ),
+          startAdornment: <SecurityIcon fontSize="small" color="action" sx={{ mr: 1 }} />,
         }}
         sx={RequiredFieldCss}
       />
