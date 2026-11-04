@@ -9,26 +9,18 @@ COPY . .
 
 RUN mkdir -p logs && \
     chown -R node:node /apps/logs && \
-    chown -R node:node /assets && \
+    chown -R node:node /apps/assets && \
     chown node:node /apps
 
 USER node
 
-ARG PORT=20434
+ARG PORT=4000
 ARG APP_VERSION=0.0.0
-ARG ALLOWED_CORS_ORIGIN
-ARG SERVER_HOST
-ARG EXT_SERVER_HOST
-ARG API_GATEWAY_URL
-ARG BACKEND_URL
+
 
 ENV PORT=${PORT}
 ENV APP_VERSION=${APP_VERSION}
-ENV ALLOWED_CORS_ORIGIN=${ALLOWED_CORS_ORIGIN}
-ENV SERVER_HOST=${SERVER_HOST}
-ENV EXT_SERVER_HOST=${EXT_SERVER_HOST}
-ENV API_GATEWAY_URL=${API_GATEWAY_URL}
-ENV BACKEND_URL=${BACKEND_URL}
+
 
 EXPOSE ${PORT}
 CMD [ "npm","start" ]
