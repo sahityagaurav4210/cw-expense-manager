@@ -1,12 +1,16 @@
 FROM node:24-alpine
 
 WORKDIR /apps
-COPY package-*.json .
-COPY tsconfig.json .
+COPY package*.json ./
+
+RUN npm install
 
 COPY . .
-RUN npm install \
-    && chown -R node:node /apps
+
+RUN mkdir -p logs && \
+    chown -R node:node /apps/logs && \
+    chown -R node:node /assets && \
+    chown node:node /apps
 
 USER node
 
@@ -17,7 +21,6 @@ ARG SERVER_HOST
 ARG EXT_SERVER_HOST
 ARG API_GATEWAY_URL
 ARG BACKEND_URL
-
 
 ENV PORT=${PORT}
 ENV APP_VERSION=${APP_VERSION}
