@@ -1,0 +1,8 @@
+node_modules
+.env
+credentials.json
+.prettierrc
+uploads
+logs
+dist
+requests.log
