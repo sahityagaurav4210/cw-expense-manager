@@ -7,15 +7,14 @@ COPY tsconfig.json .
 
 RUN npm install
 
-COPY ./src ./src
-COPY ./templates ./templates
+COPY . .
 
-USER node
 RUN npm run build && \
     rm -rf src tsconfig.json && \
     mkdir logs uploads && \
     chown -R node:node /apps
 
+USER node
 
 ARG PORT=5000
 ENV PORT=${PORT}
