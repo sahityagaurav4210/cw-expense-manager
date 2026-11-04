@@ -1,13 +1,11 @@
 # Stage 1: Build the application
-FROM eclipse-temurin:17-jdk AS builder
+FROM maven:3.9-eclipse-temurin-17 AS builder
 
 WORKDIR /app
-COPY . .
+COPY pom.xml .
+COPY src ./src
 
-# Cache-busting argument (forces re-execution of mvnw)
-ARG CACHE_DATE=1
-
-RUN sed -i 's/\r$//' mvnw && chmod +x mvnw && ./mvnw clean install -DskipTests
+RUN mvn clean package -DskipTests
 
 # Stage 2: Run the application
 FROM eclipse-temurin:17-jre
