@@ -1,33 +1,44 @@
 // update-version.js
-import fs from "node:fs";
-import path from "node:path";
+import fs from 'node:fs';
+import path from 'node:path';
 
 const __dirname = import.meta.dirname;
 
-const packageJsonPath = path.resolve(__dirname, "../package.json");
-const packageJsonData = fs.readFileSync(packageJsonPath, "utf8").toString();
+const packageJsonPath = path.resolve(__dirname, '../package.json');
+const packageJsonData = fs.readFileSync(packageJsonPath, 'utf8').toString();
 const packageJson = JSON.parse(packageJsonData);
 
 const newVersion = packageJson.version;
 
-const envPath = path.resolve(__dirname, "../", ".env");
+const envPath = path.resolve(__dirname, '../', '.env');
 
-let envContent = "";
+let envContent = '';
 if (fs.existsSync(envPath)) {
-  envContent = fs.readFileSync(envPath, "utf8");
+  envContent = fs.readFileSync(envPath, 'utf8');
 }
 
-const versionKey = "APP_VERSION";
+const versionKey = 'APP_VERSION';
 const newEntry = `${versionKey}=${newVersion}`;
-const regex = new RegExp(`^${versionKey}=.*`, "m");
+const regex = new RegExp(`^${versionKey}=.*`, 'm');
 
 if (regex.test(envContent)) {
   envContent = envContent.replace(regex, newEntry);
 } else {
-  const prefix =
-    envContent.length > 0 && !envContent.endsWith("\n") ? "\n" : "";
+  const prefix = envContent.length > 0 && !envContent.endsWith('\n') ? '\n' : '';
   envContent += `${prefix}${newEntry}`;
 }
 
 fs.writeFileSync(envPath, envContent);
 console.log(`✅ Updated .env variable ${versionKey} to ${newVersion}`);
+
+const dockerfilePath = path.resolve(__dirname, '../Dockerfile');
+if (fs.existsSync(dockerfilePath)) {
+  let dockerContent = fs.readFileSync(dockerfilePath, 'utf8');
+  const dockerRegex = new RegExp(String.raw`^ARG\s+${versionKey}(?:=.*)?$`, 'm');
+
+  if (dockerRegex.test(dockerContent)) {
+    dockerContent = dockerContent.replace(dockerRegex, `ARG ${versionKey}=${newVersion}`);
+    fs.writeFileSync(dockerfilePath, dockerContent);
+    console.log(`✅ Updated Dockerfile ARG ${versionKey} to ${newVersion}`);
+  }
+}

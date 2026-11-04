@@ -8,13 +8,13 @@
     "nodejs",
     "portfolio-builder"
   ],
-  "homepage": "https://github.com/sahityagaurav4210/cw-pbb-worker#readme",
+  "homepage": "https://github.com/sahityagaurav4210/cw-expense-manager#readme",
   "bugs": {
-    "url": "https://github.com/sahityagaurav4210/cw-pbb-worker/issues"
+    "url": "https://github.com/sahityagaurav4210/cw-expense-manager/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sahityagaurav4210/cw-pbb-worker.git"
+    "url": "git+https://github.com/sahityagaurav4210/cw-expense-manager.git"
   },
   "license": "ISC",
   "author": "Gaurav Sahitya",
