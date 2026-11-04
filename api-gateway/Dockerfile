@@ -14,9 +14,9 @@ FROM eclipse-temurin:17-jre
 WORKDIR /app
 
 # Copy ONLY the built jar file from the 'builder' stage
-COPY --from=builder /app/target/jnotifier-backend.jar ./app.jar
+COPY --from=builder /app/target/cw-expense-gateway.jar ./app.jar
 
-ARG PORT=7789
+ARG PORT=8080
 ENV PORT=${PORT}
 
 EXPOSE ${PORT}
