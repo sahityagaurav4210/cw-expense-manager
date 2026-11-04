@@ -1,5 +1,5 @@
-import Redis from "ioredis";
-import { logger } from "./logger.config";
+import Redis from 'ioredis';
+import { logger } from './logger.config';
 
 /**
  * Singleton RedisConfig class managing Redis client connection and key prefixing.
@@ -7,16 +7,18 @@ import { logger } from "./logger.config";
 export class RedisConfig {
   private static instance: Redis;
   private static publisherInstance: Redis;
-  private static readonly KEY_PREFIX = "cw-expense-tracker:";
+  private static readonly KEY_PREFIX = 'cw-expense-tracker:';
 
   private constructor() {}
 
   public static getInstance(): Redis {
     if (!RedisConfig.instance) {
-      const redisHost = process.env.REDIS_HOST || "localhost";
-      const redisPort = parseInt(process.env.REDIS_PORT || "6379", 10);
+      const redisHost = process.env.REDIS_HOST || 'localhost';
+      const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10);
+      const redisPassword = process.env.REDIS_PASSWORD;
 
       RedisConfig.instance = new Redis({
+        password: redisPassword,
         host: redisHost,
         port: redisPort,
         keyPrefix: RedisConfig.KEY_PREFIX,
@@ -27,11 +29,11 @@ export class RedisConfig {
         lazyConnect: true,
       });
 
-      RedisConfig.instance.on("connect", () => {
-        logger.info("Connected to Redis service successfully.");
+      RedisConfig.instance.on('connect', () => {
+        logger.info('Connected to Redis service successfully.');
       });
 
-      RedisConfig.instance.on("error", (err) => {
+      RedisConfig.instance.on('error', (err) => {
         logger.warn(`Redis connection warning: ${err.message}`);
       });
     }
@@ -41,12 +43,14 @@ export class RedisConfig {
 
   public static getPublisherInstance(): Redis {
     if (!RedisConfig.publisherInstance) {
-      const redisHost = process.env.REDIS_HOST || "localhost";
-      const redisPort = parseInt(process.env.REDIS_PORT || "6379", 10);
+      const redisHost = process.env.REDIS_HOST || 'localhost';
+      const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10);
+      const redisPassword = process.env.REDIS_PASSWORD;
 
       RedisConfig.publisherInstance = new Redis({
         host: redisHost,
         port: redisPort,
+        password: redisPassword,
         // No keyPrefix so channel names are exact
         retryStrategy(times) {
           const delay = Math.min(times * 100, 2000);
@@ -55,11 +59,11 @@ export class RedisConfig {
         lazyConnect: true,
       });
 
-      RedisConfig.publisherInstance.on("connect", () => {
-        logger.info("Connected to Redis publisher successfully.");
+      RedisConfig.publisherInstance.on('connect', () => {
+        logger.info('Connected to Redis publisher successfully.');
       });
 
-      RedisConfig.publisherInstance.on("error", (err) => {
+      RedisConfig.publisherInstance.on('error', (err) => {
         logger.warn(`Redis publisher warning: ${err.message}`);
       });
     }
