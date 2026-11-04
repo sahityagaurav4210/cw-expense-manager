@@ -7,9 +7,13 @@ COPY tsconfig.json .
 
 RUN npm install
 
-COPY . .
+COPY ./src ./src
+COPY ./templates ./templates
 
-RUN npm run build && rm -rf src tsconfig.json && mkdir logs uploads && chown node:node logs uploads templates
+RUN npm run build && \
+    rm -rf src tsconfig.json && \
+    mkdir logs uploads && \
+    chown -R node:node /apps
 
 USER node
 
