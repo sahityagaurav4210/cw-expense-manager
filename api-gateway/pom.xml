@@ -50,6 +50,8 @@
     </dependencyManagement>
 
     <build>
+        <finalName>cw-expense-gateway</finalName>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
