@@ -1,9 +1,9 @@
-import { Category } from "../models";
-import { redisClient } from "../config/redis.config";
-import { CaptchaValidationService } from "./captchaValidation.service";
-import { logger } from "../config/logger.config";
+import { Category } from '../db/models';
+import { redisClient } from '../config/redis.config';
+import { CaptchaValidationService } from './captchaValidation.service';
+import { logger } from '../config/logger.config';
 
-const REDIS_CATEGORY_KEY = "categories:master:v2";
+const REDIS_CATEGORY_KEY = 'categories:master:v2';
 
 export class CategoryService {
   public static async getAllCategories() {
@@ -19,20 +19,20 @@ export class CategoryService {
 
     const categories = await Category.findAll({
       where: { delete_flag: false },
-      order: [["id", "DESC"]],
+      order: [['id', 'DESC']],
     });
 
     try {
-      await redisClient.set(REDIS_CATEGORY_KEY, JSON.stringify(categories), "EX", 3600);
+      await redisClient.set(REDIS_CATEGORY_KEY, JSON.stringify(categories), 'EX', 3600);
     } catch {}
 
     return categories;
   }
 
   public static async createCategory(data: any) {
-    const isCaptchaValid = await CaptchaValidationService.validate(data.captchaText, data.captchaId || "default");
+    const isCaptchaValid = await CaptchaValidationService.validate(data.captchaText, data.captchaId || 'default');
     if (!isCaptchaValid) {
-      throw new Error("Invalid CAPTCHA verification code.");
+      throw new Error('Invalid CAPTCHA verification code.');
     }
 
     const category = await Category.create({
@@ -46,14 +46,14 @@ export class CategoryService {
   }
 
   public static async toggleActiveStatus(id: number, captchaText: string, captchaId?: string) {
-    const isCaptchaValid = await CaptchaValidationService.validate(captchaText, captchaId || "default");
+    const isCaptchaValid = await CaptchaValidationService.validate(captchaText, captchaId || 'default');
     if (!isCaptchaValid) {
-      throw new Error("Invalid CAPTCHA verification code.");
+      throw new Error('Invalid CAPTCHA verification code.');
     }
 
     const category = await Category.findByPk(id);
     if (!category || category.delete_flag) {
-      throw new Error("Category not found.");
+      throw new Error('Category not found.');
     }
 
     category.active_flag = !category.active_flag;
@@ -64,14 +64,14 @@ export class CategoryService {
   }
 
   public static async deleteCategory(id: number, captchaText: string, captchaId?: string) {
-    const isCaptchaValid = await CaptchaValidationService.validate(captchaText, captchaId || "default");
+    const isCaptchaValid = await CaptchaValidationService.validate(captchaText, captchaId || 'default');
     if (!isCaptchaValid) {
-      throw new Error("Invalid CAPTCHA verification code.");
+      throw new Error('Invalid CAPTCHA verification code.');
     }
 
     const category = await Category.findByPk(id);
     if (!category) {
-      throw new Error("Category not found.");
+      throw new Error('Category not found.');
     }
 
     category.delete_flag = true;
@@ -79,6 +79,6 @@ export class CategoryService {
     await category.save();
 
     await redisClient.del(REDIS_CATEGORY_KEY).catch(() => {});
-    return { success: true, message: "Category marked as deleted." };
+    return { success: true, message: 'Category marked as deleted.' };
   }
 }

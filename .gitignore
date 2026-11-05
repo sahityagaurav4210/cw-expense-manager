@@ -9,3 +9,5 @@ requests.log
 api-gateway/target/
 .idea/
 application-local.yml
+application-prod.yml
+bin/

@@ -1,7 +1,7 @@
-import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../config/database.config";
-import { User } from "./User";
-import { Category } from "./Category";
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '../../config/database.config';
+import { User } from './User';
+import { Category } from './Category';
 
 export interface ExpenseAttributes {
   id?: number;
@@ -9,7 +9,7 @@ export interface ExpenseAttributes {
   category_id?: number | null;
   name: string;
   amount: number;
-  type: "Fixed" | "Variable";
+  type: 'Fixed' | 'Variable';
   expense_date?: string;
   bill_url?: string | null;
   bill_original_name?: string | null;
@@ -19,18 +19,18 @@ export interface ExpenseAttributes {
 }
 
 export class Expense extends Model<ExpenseAttributes> implements ExpenseAttributes {
-  public declare id: number;
-  public declare user_id: number;
-  public declare category_id: number | null;
-  public declare name: string;
-  public declare amount: number;
-  public declare type: "Fixed" | "Variable";
-  public declare expense_date: string;
-  public declare bill_url: string | null;
-  public declare bill_original_name: string | null;
-  public declare bill_mime_type: string | null;
-  public declare readonly created_at: Date;
-  public declare readonly updated_at: Date;
+  declare public id: number;
+  declare public user_id: number;
+  declare public category_id: number | null;
+  declare public name: string;
+  declare public amount: number;
+  declare public type: 'Fixed' | 'Variable';
+  declare public expense_date: string;
+  declare public bill_url: string | null;
+  declare public bill_original_name: string | null;
+  declare public bill_mime_type: string | null;
+  declare public readonly created_at: Date;
+  declare public readonly updated_at: Date;
 }
 
 Expense.init(
@@ -45,7 +45,7 @@ Expense.init(
       allowNull: false,
       references: {
         model: User,
-        key: "id",
+        key: 'id',
       },
     },
     category_id: {
@@ -53,7 +53,7 @@ Expense.init(
       allowNull: true,
       references: {
         model: Category,
-        key: "id",
+        key: 'id',
       },
     },
     name: {
@@ -65,7 +65,7 @@ Expense.init(
       allowNull: false,
     },
     type: {
-      type: DataTypes.ENUM("Fixed", "Variable"),
+      type: DataTypes.ENUM('Fixed', 'Variable'),
       allowNull: false,
     },
     expense_date: {
@@ -88,15 +88,15 @@ Expense.init(
   },
   {
     sequelize,
-    tableName: "expenses",
-    schema: "public",
+    tableName: 'expenses',
+    schema: 'public',
     timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-  }
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
 );
 
-User.hasMany(Expense, { foreignKey: "user_id" });
-Expense.belongsTo(User, { foreignKey: "user_id" });
-Category.hasMany(Expense, { foreignKey: "category_id" });
-Expense.belongsTo(Category, { foreignKey: "category_id" });
+User.hasMany(Expense, { foreignKey: 'user_id' });
+Expense.belongsTo(User, { foreignKey: 'user_id' });
+Category.hasMany(Expense, { foreignKey: 'category_id' });
+Expense.belongsTo(Category, { foreignKey: 'category_id' });

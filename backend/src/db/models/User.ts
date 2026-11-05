@@ -1,5 +1,5 @@
-import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../config/database.config";
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '../../config/database.config';
 
 export interface UserAttributes {
   id?: number;
@@ -7,10 +7,10 @@ export interface UserAttributes {
   email: string;
   phone_no?: string;
   password?: string;
-  employment_type: "Salaried" | "Self-Employed";
+  employment_type: 'Salaried' | 'Self-Employed';
   annual_income?: number | null;
   profile_photo_url?: string;
-  two_factor_method?: "EMAIL" | "AUTHENTICATOR";
+  two_factor_method?: 'EMAIL' | 'AUTHENTICATOR';
   authenticator_secret?: string;
   is_authenticator_enabled?: boolean;
   is_terms_accepted?: boolean;
@@ -20,21 +20,21 @@ export interface UserAttributes {
 }
 
 export class User extends Model<UserAttributes> implements UserAttributes {
-  public declare id: number;
-  public declare name: string;
-  public declare email: string;
-  public declare phone_no: string;
-  public declare password: string;
-  public declare employment_type: "Salaried" | "Self-Employed";
-  public declare annual_income: number | null;
-  public declare profile_photo_url: string;
-  public declare two_factor_method: "EMAIL" | "AUTHENTICATOR";
-  public declare authenticator_secret: string;
-  public declare is_authenticator_enabled: boolean;
-  public declare is_terms_accepted: boolean;
-  public declare isTermsAccepted: boolean;
-  public declare readonly created_at: Date;
-  public declare readonly updated_at: Date;
+  declare public id: number;
+  declare public name: string;
+  declare public email: string;
+  declare public phone_no: string;
+  declare public password: string;
+  declare public employment_type: 'Salaried' | 'Self-Employed';
+  declare public annual_income: number | null;
+  declare public profile_photo_url: string;
+  declare public two_factor_method: 'EMAIL' | 'AUTHENTICATOR';
+  declare public authenticator_secret: string;
+  declare public is_authenticator_enabled: boolean;
+  declare public is_terms_accepted: boolean;
+  declare public isTermsAccepted: boolean;
+  declare public readonly created_at: Date;
+  declare public readonly updated_at: Date;
 }
 
 User.init(
@@ -62,7 +62,7 @@ User.init(
       allowNull: false,
     },
     employment_type: {
-      type: DataTypes.ENUM("Salaried", "Self-Employed"),
+      type: DataTypes.ENUM('Salaried', 'Self-Employed'),
       allowNull: false,
     },
     annual_income: {
@@ -77,7 +77,7 @@ User.init(
     two_factor_method: {
       type: DataTypes.STRING(20),
       allowNull: false,
-      defaultValue: "EMAIL",
+      defaultValue: 'EMAIL',
     },
     authenticator_secret: {
       type: DataTypes.STRING(255),
@@ -101,10 +101,10 @@ User.init(
   },
   {
     sequelize,
-    tableName: "users",
-    schema: "public",
+    tableName: 'users',
+    schema: 'public',
     timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-  }
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
 );

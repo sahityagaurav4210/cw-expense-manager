@@ -1,5 +1,5 @@
-import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../config/database.config";
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '../../config/database.config';
 
 export interface CategoryAttributes {
   id?: number;
@@ -11,12 +11,12 @@ export interface CategoryAttributes {
 }
 
 export class Category extends Model<CategoryAttributes> implements CategoryAttributes {
-  public declare id: number;
-  public declare name: string;
-  public declare active_flag: boolean;
-  public declare delete_flag: boolean;
-  public declare readonly created_at: Date;
-  public declare readonly updated_at: Date;
+  declare public id: number;
+  declare public name: string;
+  declare public active_flag: boolean;
+  declare public delete_flag: boolean;
+  declare public readonly created_at: Date;
+  declare public readonly updated_at: Date;
 }
 
 Category.init(
@@ -43,10 +43,10 @@ Category.init(
   },
   {
     sequelize,
-    tableName: "categories",
-    schema: "master",
+    tableName: 'categories',
+    schema: 'master',
     timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-  }
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
 );

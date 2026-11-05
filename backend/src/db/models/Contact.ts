@@ -1,6 +1,6 @@
-import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../config/database.config";
-import { User } from "./User";
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '../../config/database.config';
+import { User } from './User';
 
 export interface ContactAttributes {
   id?: number;
@@ -20,20 +20,20 @@ export interface ContactAttributes {
 }
 
 export class Contact extends Model<ContactAttributes> implements ContactAttributes {
-  public declare id: number;
-  public declare user_id: number;
-  public declare name: string;
-  public declare phone: string;
-  public declare email: string | null;
-  public declare profile_photo: string | null;
-  public declare company: string | null;
-  public declare job_title: string | null;
-  public declare category: string;
-  public declare address: string | null;
-  public declare notes: string | null;
-  public declare is_favorite: boolean;
-  public declare readonly created_at: Date;
-  public declare readonly updated_at: Date;
+  declare public id: number;
+  declare public user_id: number;
+  declare public name: string;
+  declare public phone: string;
+  declare public email: string | null;
+  declare public profile_photo: string | null;
+  declare public company: string | null;
+  declare public job_title: string | null;
+  declare public category: string;
+  declare public address: string | null;
+  declare public notes: string | null;
+  declare public is_favorite: boolean;
+  declare public readonly created_at: Date;
+  declare public readonly updated_at: Date;
 }
 
 Contact.init(
@@ -48,7 +48,7 @@ Contact.init(
       allowNull: false,
       references: {
         model: User,
-        key: "id",
+        key: 'id',
       },
     },
     name: {
@@ -78,7 +78,7 @@ Contact.init(
     category: {
       type: DataTypes.STRING(50),
       allowNull: false,
-      defaultValue: "Other",
+      defaultValue: 'Other',
     },
     address: {
       type: DataTypes.STRING(255),
@@ -96,15 +96,15 @@ Contact.init(
   },
   {
     sequelize,
-    tableName: "contacts",
-    schema: "public",
+    tableName: 'contacts',
+    schema: 'public',
     timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-  }
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
 );
 
-User.hasMany(Contact, { foreignKey: "user_id" });
-Contact.belongsTo(User, { foreignKey: "user_id" });
+User.hasMany(Contact, { foreignKey: 'user_id' });
+Contact.belongsTo(User, { foreignKey: 'user_id' });
 
 export default Contact;

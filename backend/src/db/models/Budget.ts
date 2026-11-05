@@ -1,6 +1,6 @@
-import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../config/database.config";
-import { User } from "./User";
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '../../config/database.config';
+import { User } from './User';
 
 export interface BudgetAttributes {
   id?: number;
@@ -13,13 +13,13 @@ export interface BudgetAttributes {
 }
 
 export class Budget extends Model<BudgetAttributes> implements BudgetAttributes {
-  public declare id: number;
-  public declare user_id: number;
-  public declare amount: number;
-  public declare from_date: string;
-  public declare to_date: string;
-  public declare readonly created_at: Date;
-  public declare readonly updated_at: Date;
+  declare public id: number;
+  declare public user_id: number;
+  declare public amount: number;
+  declare public from_date: string;
+  declare public to_date: string;
+  declare public readonly created_at: Date;
+  declare public readonly updated_at: Date;
 }
 
 Budget.init(
@@ -34,7 +34,7 @@ Budget.init(
       allowNull: false,
       references: {
         model: User,
-        key: "id",
+        key: 'id',
       },
     },
     amount: {
@@ -52,13 +52,13 @@ Budget.init(
   },
   {
     sequelize,
-    tableName: "budgets",
-    schema: "public",
+    tableName: 'budgets',
+    schema: 'public',
     timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-  }
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
 );
 
-User.hasMany(Budget, { foreignKey: "user_id" });
-Budget.belongsTo(User, { foreignKey: "user_id" });
+User.hasMany(Budget, { foreignKey: 'user_id' });
+Budget.belongsTo(User, { foreignKey: 'user_id' });

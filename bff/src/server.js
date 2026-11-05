@@ -48,7 +48,8 @@ async function bootstrap() {
 
   app.listen(PORT, SERVER_HOST);
 
-  logger.info(bannerContent);
+  console.clear();
+  console.log(bannerContent);
   logger.info(`BFF server is running on ${EXT_SERVER_HOST} 🚀🚀🚀🚀`);
 }
 
