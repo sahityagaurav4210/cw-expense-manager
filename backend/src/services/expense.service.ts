@@ -1,4 +1,5 @@
-import { Expense, Category } from '../db/models';
+import { Expense, Category, Budget } from '../db/models';
+import { Op } from 'sequelize';
 import { sequelize } from '../config/database.config';
 import { redisClient } from '../config/redis.config';
 import { CaptchaValidationService } from './captchaValidation.service';
@@ -46,6 +47,12 @@ export class ExpenseService {
       billMimeType = file.mimetype;
     }
 
+    const paymentMode = data.payment_mode || 'Cash';
+    const isCcPayment =
+      data.is_cc_payment === true ||
+      data.is_cc_payment === 'true' ||
+      /credit\s*card\s*bill/i.test(data.name || '');
+
     const expense = await Expense.create({
       user_id: userId,
       name: data.name,
@@ -56,7 +63,23 @@ export class ExpenseService {
       bill_url: billUrl,
       bill_original_name: billOriginalName,
       bill_mime_type: billMimeType,
+      payment_mode: paymentMode,
+      is_settled: paymentMode === 'Credit Card' ? false : true,
     });
+
+    if (isCcPayment) {
+      // Wipe out all pending credit card dues for this user
+      await Expense.update(
+        { is_settled: true },
+        {
+          where: {
+            user_id: userId,
+            payment_mode: 'Credit Card',
+            is_settled: false,
+          },
+        },
+      );
+    }
 
     return expense;
   }
@@ -154,12 +177,12 @@ export class ExpenseService {
           column: 'Expense Name',
           message: `Row ${row.excelRowNumber} (Sr. No. ${displaySrNo}): Invalid Expense Name "${trimmedName}". It must be of at least 3 characters and can be of at most 100 characters.`,
         });
-      } else if (!/^[a-zA-Z0-9\s_\-\/]+$/.test(trimmedName)) {
+      } else if (!/^[a-zA-Z0-9\s_\-\/()]+$/.test(trimmedName)) {
         validationErrors.push({
           excelRowNumber: row.excelRowNumber,
           srNo: displaySrNo,
           column: 'Expense Name',
-          message: `Row ${row.excelRowNumber} (Sr. No. ${displaySrNo}): Invalid Expense Name "${trimmedName}". Only letters, numbers, spaces, dash, underscore, and forward slash are allowed.`,
+          message: `Row ${row.excelRowNumber} (Sr. No. ${displaySrNo}): Invalid Expense Name "${trimmedName}". Only letters, numbers, spaces, dash, underscore, forward slash, and parentheses are allowed.`,
         });
       }
 
@@ -299,6 +322,182 @@ export class ExpenseService {
     });
   }
 
+  public static async getPaginatedUserExpenses(userId: number, payload: any = {}) {
+    const page = Math.max(0, parseInt(String(payload.page || 0), 10));
+    const size = Math.max(1, Math.min(100, parseInt(String(payload.size || 10), 10)));
+    const offset = page * size;
+
+    // Fetch user budgets to resolve default period & available options
+    const todayStr = dayjs().format('YYYY-MM-DD');
+    const userBudgets = await Budget.findAll({
+      where: { user_id: userId },
+      order: [
+        ['from_date', 'DESC'],
+        ['created_at', 'DESC'],
+      ],
+    });
+
+    const activeBudget =
+      userBudgets.find((b) => todayStr >= b.from_date && todayStr <= b.to_date) ||
+      userBudgets[0] ||
+      null;
+
+    const whereConditions: any[] = [{ user_id: userId }];
+
+    // Period / Budget range filtering (Approach 1)
+    if (payload.from_date && payload.to_date) {
+      whereConditions.push({
+        expense_date: {
+          [Op.between]: [payload.from_date, payload.to_date],
+        },
+      });
+    } else if (payload.budgetId && payload.budgetId !== 'all') {
+      let targetBudget = null;
+      if (payload.budgetId === 'active') {
+        targetBudget = activeBudget;
+      } else {
+        const bId = Number(payload.budgetId);
+        targetBudget = userBudgets.find((b) => b.id === bId) || null;
+      }
+
+      if (targetBudget && targetBudget.from_date && targetBudget.to_date) {
+        whereConditions.push({
+          expense_date: {
+            [Op.between]: [targetBudget.from_date, targetBudget.to_date],
+          },
+        });
+      }
+    } else if (payload.from_date) {
+      whereConditions.push({
+        expense_date: { [Op.gte]: payload.from_date },
+      });
+    } else if (payload.to_date) {
+      whereConditions.push({
+        expense_date: { [Op.lte]: payload.to_date },
+      });
+    } else if (payload.budgetId !== 'all' && activeBudget) {
+      // Default to active budget period if not explicitly set to 'all'
+      whereConditions.push({
+        expense_date: {
+          [Op.between]: [activeBudget.from_date, activeBudget.to_date],
+        },
+      });
+    }
+
+    // Global Search Term (debouncedSearch from useAppMRTPagination)
+    if (payload.searchTerm && String(payload.searchTerm).trim()) {
+      const searchStr = `%${String(payload.searchTerm).trim()}%`;
+      whereConditions.push({
+        [Op.or]: [
+          { name: { [Op.iLike]: searchStr } },
+          sequelize.where(sequelize.cast(sequelize.col('Expense.amount'), 'text'), {
+            [Op.iLike]: searchStr,
+          }),
+          sequelize.where(sequelize.col('Category.name'), {
+            [Op.iLike]: searchStr,
+          }),
+          { payment_mode: { [Op.iLike]: searchStr } },
+          { type: { [Op.iLike]: searchStr } },
+        ],
+      });
+    }
+
+    // Column Filters (from useAppMRTPagination)
+    if (Array.isArray(payload.filters) && payload.filters.length > 0) {
+      for (const filter of payload.filters) {
+        const { fieldName, value, operator } = filter;
+        if (value === undefined || value === null || value === '') continue;
+
+        if (fieldName === 'name') {
+          whereConditions.push({ name: { [Op.iLike]: `%${value}%` } });
+        } else if (fieldName === 'amount') {
+          const numVal = parseFloat(value);
+          if (!isNaN(numVal)) {
+            if (operator === 'GREATER_THAN') {
+              whereConditions.push({ amount: { [Op.gt]: numVal } });
+            } else if (operator === 'LESS_THAN') {
+              whereConditions.push({ amount: { [Op.lt]: numVal } });
+            } else {
+              whereConditions.push({ amount: numVal });
+            }
+          }
+        } else if (fieldName === 'Category.name' || fieldName === 'category' || fieldName === 'Category_name') {
+          whereConditions.push(
+            sequelize.where(sequelize.col('Category.name'), {
+              [Op.iLike]: `%${value}%`,
+            }),
+          );
+        } else if (fieldName === 'type') {
+          whereConditions.push({ type: { [Op.iLike]: `%${value}%` } });
+        } else if (fieldName === 'payment_mode') {
+          whereConditions.push({ payment_mode: { [Op.iLike]: `%${value}%` } });
+        } else if (fieldName === 'expense_date') {
+          whereConditions.push({ expense_date: { [Op.iLike]: `%${value}%` } });
+        } else if (fieldName === 'id') {
+          const idNum = parseInt(value, 10);
+          if (!isNaN(idNum)) {
+            whereConditions.push({ id: idNum });
+          }
+        }
+      }
+    }
+
+    // Sorting (from useAppMRTPagination)
+    const orderClause: any[] = [];
+    if (Array.isArray(payload.sorting) && payload.sorting.length > 0) {
+      for (const s of payload.sorting) {
+        const dir = (s.order || 'asc').toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+        if (s.fieldName === 'Category.name' || s.fieldName === 'category' || s.fieldName === 'Category_name') {
+          orderClause.push([Category, 'name', dir]);
+        } else if (['id', 'name', 'amount', 'type', 'expense_date', 'payment_mode', 'created_at'].includes(s.fieldName)) {
+          orderClause.push([s.fieldName, dir]);
+        }
+      }
+    }
+    if (orderClause.length === 0) {
+      orderClause.push(['id', 'DESC']);
+    }
+
+    const { rows, count } = await Expense.findAndCountAll({
+      where: { [Op.and]: whereConditions },
+      include: [
+        {
+          model: Category,
+          attributes: ['id', 'name'],
+          required: false,
+        },
+      ],
+      order: orderClause,
+      limit: size,
+      offset,
+      distinct: true,
+    });
+
+    return {
+      rows,
+      count,
+      page,
+      size,
+      totalPages: Math.ceil(count / size),
+      activeBudget: activeBudget
+        ? {
+            id: activeBudget.id,
+            amount: parseFloat(activeBudget.amount as any),
+            from_date: activeBudget.from_date,
+            to_date: activeBudget.to_date,
+            isActive: todayStr >= activeBudget.from_date && todayStr <= activeBudget.to_date,
+          }
+        : null,
+      availableBudgets: userBudgets.map((b) => ({
+        id: b.id,
+        amount: parseFloat(b.amount as any),
+        from_date: b.from_date,
+        to_date: b.to_date,
+        isActive: todayStr >= b.from_date && todayStr <= b.to_date,
+      })),
+    };
+  }
+
   public static async getExpenseBill(userId: number, expenseId: number) {
     const expense = await Expense.findOne({ where: { id: expenseId, user_id: userId } });
     if (!expense || !expense.bill_url) {
@@ -377,5 +576,108 @@ export class ExpenseService {
     await expense.save();
 
     return expense;
+  }
+
+  public static async updateExpense(
+    userId: number,
+    expenseId: number,
+    data: any,
+    file?: Express.Multer.File,
+  ) {
+    const expense = await Expense.findOne({ where: { id: expenseId, user_id: userId } });
+    if (!expense) {
+      throw new Error('Expense record not found.');
+    }
+
+    const captchaCode = data.captchaText || data.captcha;
+    if (captchaCode) {
+      const isCaptchaValid = await CaptchaValidationService.validate(captchaCode, data.captchaId || 'default');
+      if (!isCaptchaValid) {
+        throw new Error('Invalid CAPTCHA verification code.');
+      }
+    }
+
+    // Handle new receipt upload
+    if (file && file.buffer) {
+      if (expense.bill_url) {
+        const oldFileName = path.basename(expense.bill_url);
+        const oldFilePath = path.join(process.cwd(), 'uploads', 'bills', oldFileName);
+        if (fs.existsSync(oldFilePath)) {
+          try {
+            fs.unlinkSync(oldFilePath);
+          } catch {}
+        }
+      }
+
+      const encryptedBuffer = EncryptionService.encryptBuffer(file.buffer);
+      const ext = path.extname(file.originalname).toLowerCase();
+      const fileName = `bill-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}.enc`;
+      const billsDir = path.join(process.cwd(), 'uploads', 'bills');
+      if (!fs.existsSync(billsDir)) {
+        fs.mkdirSync(billsDir, { recursive: true });
+      }
+      const filePath = path.join(billsDir, fileName);
+      fs.writeFileSync(filePath, encryptedBuffer);
+
+      expense.bill_url = `/uploads/bills/${fileName}`;
+      expense.bill_original_name = file.originalname;
+      expense.bill_mime_type = file.mimetype;
+    } else if (data.remove_bill === true || data.remove_bill === 'true') {
+      if (expense.bill_url) {
+        const oldFileName = path.basename(expense.bill_url);
+        const oldFilePath = path.join(process.cwd(), 'uploads', 'bills', oldFileName);
+        if (fs.existsSync(oldFilePath)) {
+          try {
+            fs.unlinkSync(oldFilePath);
+          } catch {}
+        }
+      }
+      expense.bill_url = null;
+      expense.bill_original_name = null;
+      expense.bill_mime_type = null;
+    }
+
+    if (data.name !== undefined) expense.name = data.name;
+    if (data.amount !== undefined) expense.amount = parseFloat(data.amount);
+    if (data.category_id !== undefined) {
+      expense.category_id = data.category_id ? parseInt(data.category_id, 10) : null;
+    }
+    if (data.type !== undefined) expense.type = data.type;
+    if (data.expense_date !== undefined) expense.expense_date = data.expense_date;
+    if (data.payment_mode !== undefined) {
+      expense.payment_mode = data.payment_mode;
+      if (expense.payment_mode === 'Credit Card' && data.is_settled === undefined) {
+        expense.is_settled = false;
+      }
+    }
+    if (data.is_settled !== undefined) {
+      expense.is_settled = data.is_settled === true || data.is_settled === 'true';
+    }
+
+    const isCcPayment =
+      data.is_cc_payment === true ||
+      data.is_cc_payment === 'true' ||
+      /credit\s*card\s*bill/i.test(expense.name || '');
+
+    if (isCcPayment) {
+      // Wipe out all pending credit card dues for this user
+      await Expense.update(
+        { is_settled: true },
+        {
+          where: {
+            user_id: userId,
+            payment_mode: 'Credit Card',
+            is_settled: false,
+          },
+        },
+      );
+    }
+
+    await expense.save();
+
+    return await Expense.findOne({
+      where: { id: expense.id },
+      include: [{ model: Category, attributes: ['id', 'name'] }],
+    });
   }
 }

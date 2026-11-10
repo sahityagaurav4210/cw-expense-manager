@@ -152,6 +152,31 @@ export const categorySchema = Joi.object({
   captchaId: Joi.number().allow("", null).optional(),
 });
 
+export const paymentOptionSchema = Joi.object({
+  payment_name: Joi.string()
+    .max(100)
+    .pattern(/^[a-zA-Z0-9\s_\-\/]+$/)
+    .optional()
+    .messages({
+      "string.pattern.base":
+        "Payment name can only contain letters, numbers, spaces, dash, underscore, and forward slash.",
+    }),
+  PaymentName: Joi.string()
+    .max(100)
+    .pattern(/^[a-zA-Z0-9\s_\-\/]+$/)
+    .optional(),
+  name: Joi.string()
+    .max(100)
+    .pattern(/^[a-zA-Z0-9\s_\-\/]+$/)
+    .optional(),
+  is_active: Joi.boolean().default(true),
+  isActive: Joi.boolean().optional(),
+  is_deleted: Joi.boolean().default(false),
+  isDeleted: Joi.boolean().optional(),
+  captchaText: Joi.string().required(),
+  captchaId: Joi.alternatives().try(Joi.number(), Joi.string()).allow("", null).optional(),
+}).unknown(true);
+
 export const budgetSchema = Joi.object({
   amount: Joi.number().positive().invalid(NaN).required(),
   from_date: Joi.string()
@@ -169,7 +194,7 @@ export const expenseSchema = Joi.object({
     .trim()
     .min(3)
     .max(100)
-    .pattern(/^[a-zA-Z0-9\s_\-\/]+$/)
+    .pattern(/^[a-zA-Z0-9\s_\-\/()]+$/)
     .required()
     .messages({
       "string.empty": "Expense name is required.",
@@ -178,7 +203,7 @@ export const expenseSchema = Joi.object({
       "string.max":
         "Please enter a valid expense name. It must be of at least 3 characters and can be of at most 100 characters.",
       "string.pattern.base":
-        "Expense name can contain only letters, numbers, spaces, dash, underscore, and forward slash.",
+        "Expense name can contain only letters, numbers, spaces, dash, underscore, forward slash, and parentheses.",
     }),
   amount: Joi.number().positive().invalid(NaN).required(),
   category_id: Joi.alternatives().try(Joi.number().integer(), Joi.string().allow("", null)).optional(),
@@ -186,7 +211,42 @@ export const expenseSchema = Joi.object({
   expense_date: Joi.string()
     .pattern(/^\d{4}-\d{2}-\d{2}$/)
     .allow("", null),
-  captchaText: Joi.string().required(),
+  payment_mode: Joi.string().allow("", null).optional(),
+  is_settled: Joi.alternatives().try(Joi.boolean(), Joi.string()).optional(),
+  is_cc_payment: Joi.alternatives().try(Joi.boolean(), Joi.string()).optional(),
+  remove_bill: Joi.alternatives().try(Joi.boolean(), Joi.string()).optional(),
+  captchaText: Joi.string().optional(),
+  captchaId: Joi.alternatives().try(Joi.number(), Joi.string()).allow("", null).optional(),
+}).unknown(true);
+
+export const updateExpenseSchema = Joi.object({
+  name: Joi.string()
+    .trim()
+    .min(3)
+    .max(100)
+    .pattern(/^[a-zA-Z0-9\s_\-\/()]+$/)
+    .optional()
+    .messages({
+      "string.empty": "Expense name cannot be empty.",
+      "string.min":
+        "Please enter a valid expense name. It must be of at least 3 characters and can be of at most 100 characters.",
+      "string.max":
+        "Please enter a valid expense name. It must be of at least 3 characters and can be of at most 100 characters.",
+      "string.pattern.base":
+        "Expense name can contain only letters, numbers, spaces, dash, underscore, forward slash, and parentheses.",
+    }),
+  amount: Joi.number().positive().invalid(NaN).optional(),
+  category_id: Joi.alternatives().try(Joi.number().integer(), Joi.string().allow("", null)).optional(),
+  type: Joi.string().valid("Fixed", "Variable").optional(),
+  expense_date: Joi.string()
+    .pattern(/^\d{4}-\d{2}-\d{2}$/)
+    .allow("", null)
+    .optional(),
+  payment_mode: Joi.string().allow("", null).optional(),
+  is_settled: Joi.alternatives().try(Joi.boolean(), Joi.string()).optional(),
+  is_cc_payment: Joi.alternatives().try(Joi.boolean(), Joi.string()).optional(),
+  remove_bill: Joi.alternatives().try(Joi.boolean(), Joi.string()).optional(),
+  captchaText: Joi.string().allow("", null).optional(),
   captchaId: Joi.alternatives().try(Joi.number(), Joi.string()).allow("", null).optional(),
 }).unknown(true);
 
@@ -215,7 +275,7 @@ export const bulkExpenseRowSchema = Joi.object({
     .trim()
     .min(3)
     .max(100)
-    .pattern(/^[a-zA-Z0-9\s_\-\/]+$/)
+    .pattern(/^[a-zA-Z0-9\s_\-\/()]+$/)
     .required()
     .messages({
       "string.empty": "Expense Name is required.",
@@ -224,7 +284,7 @@ export const bulkExpenseRowSchema = Joi.object({
       "string.max":
         "Please enter a valid expense name. It must be of at least 3 characters and can be of at most 100 characters.",
       "string.pattern.base":
-        "Expense Name can only contain letters, numbers, spaces, dash, underscore, and forward slash.",
+        "Expense Name can only contain letters, numbers, spaces, dash, underscore, forward slash, and parentheses.",
     }),
   amount: Joi.number()
     .min(1)

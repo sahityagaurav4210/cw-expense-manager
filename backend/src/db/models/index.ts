@@ -6,5 +6,6 @@ import { BudgetInflow } from "./BudgetInflow";
 import { Debt } from "./Debt";
 import { DebtSettlement } from "./DebtSettlement";
 import { Contact } from "./Contact";
+import { PaymentOptionsMaster } from "./PaymentOptionsMaster";
 
-export { Category, User, Budget, Expense, BudgetInflow, Debt, DebtSettlement, Contact };
+export { Category, User, Budget, Expense, BudgetInflow, Debt, DebtSettlement, Contact, PaymentOptionsMaster };

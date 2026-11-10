@@ -70,8 +70,15 @@ const BudgetInflowDialog = ({
             onSubmit();
           }}
           noValidate
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+            overflow: "hidden",
+            minHeight: 0,
+          }}
         >
-          <DialogContent dividers sx={{ p: 3 }}>
+          <DialogContent dividers sx={{ p: 3, overflowY: "auto" }}>
             <Box
               mb={2.5}
               p={1.5}

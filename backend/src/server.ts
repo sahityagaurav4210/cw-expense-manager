@@ -64,15 +64,6 @@ app.use('/uploads', (req, res, next) => {
 app.use(globalRequestLoggerMiddleware);
 app.use('/api/v1', routes);
 
-// Health check
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    service: 'cw-expense-tracker-backend',
-    timestamp: new Date(),
-  });
-});
-
 // Error handling middleware
 app.use(errorHandler);
 
@@ -108,11 +99,12 @@ async function bootstrap() {
     await sequelize.query(FileUtility.readFile('src/db/migrations/createDebtsTableQuery.sql')).catch(() => {});
     await sequelize.query(FileUtility.readFile('src/db/migrations/createDebtsSettlementsTableQuery.sql')).catch(() => {});
     await sequelize.query(FileUtility.readFile('src/db/migrations/createContactsTableQuery.sql')).catch(() => {});
+    await sequelize.query(FileUtility.readFile('src/db/migrations/createPaymentOptionsMasterTableQuery.sql')).catch(() => {});
     await sequelize.sync({ alter: false });
 
     app.listen(PORT, SERVER_HOST);
     console.clear();
-    console.log(FileUtility.readFile('src/assets/banner.txt'));
+    console.log(FileUtility.readFile('assets/banner.txt'));
     console.log('\n');
 
     logger.info(`ExM Backend Service started successfully on port ${PORT}`);

@@ -33,6 +33,11 @@ function ConfirmationDialog({
   const style = {
     p: 1,
     outline: "none",
+    display: "flex",
+    flexDirection: "column",
+    flex: 1,
+    overflow: "hidden",
+    minHeight: 0,
   };
 
   if (!open) return <></>;
@@ -56,7 +61,7 @@ function ConfirmationDialog({
           <Heading Icon={Icon} text={heading || "Confirmation"} mb={0} />
         </DialogTitle>
 
-        <DialogContent sx={GlobalDialogDividerCss}>
+        <DialogContent sx={{ ...GlobalDialogDividerCss, overflowY: "auto" }}>
           <Box component="div" my={1}>
             {text}
           </Box>

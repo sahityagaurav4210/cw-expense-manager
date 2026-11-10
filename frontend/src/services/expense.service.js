@@ -9,8 +9,22 @@ export const createExpenseApi = async (expenseData) => {
   return response.data;
 };
 
+export const updateExpenseApi = async (id, expenseData) => {
+  const isFormData = expenseData instanceof FormData;
+  const config = isFormData
+    ? { headers: { "Content-Type": "multipart/form-data" } }
+    : {};
+  const response = await axiosInstance.put(`/expenses/${id}`, expenseData, config);
+  return response.data;
+};
+
 export const getExpensesApi = async () => {
   const response = await axiosInstance.get("/expenses");
+  return response.data;
+};
+
+export const getPaginatedExpensesApi = async (payload) => {
+  const response = await axiosInstance.post("/expenses/paginate", payload);
   return response.data;
 };
 

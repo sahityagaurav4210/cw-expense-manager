@@ -84,6 +84,15 @@ export const categoryZodSchema = z.object({
   captchaText: z.string().min(1, "CAPTCHA is required"),
 });
 
+export const paymentOptionZodSchema = z.object({
+  payment_name: z
+    .string()
+    .min(1, "Payment name is required")
+    .max(100, "Payment name cannot exceed 100 characters")
+    .regex(/^[a-zA-Z0-9\s_\-\/]+$/, "Allowed special characters are dash, underscore, space, and forward slash"),
+  captchaText: z.string().min(1, "CAPTCHA is required"),
+});
+
 export const budgetZodSchema = z.object({
   amount: z
     .string()
@@ -102,7 +111,7 @@ export const expenseZodSchema = z.object({
     .trim()
     .min(3, "Expense name must be at least 3 characters")
     .max(100, "Expense name cannot exceed 100 characters")
-    .regex(/^[a-zA-Z0-9\s_\-\/]+$/, "Only letters, numbers, spaces, dash, underscore, and forward slash are allowed"),
+    .regex(/^[a-zA-Z0-9\s_\-\/()]+$/, "Only letters, numbers, spaces, dash, underscore, forward slash, and parentheses are allowed"),
   amount: z
     .string()
     .min(1, "Expense amount is required")
@@ -114,7 +123,34 @@ export const expenseZodSchema = z.object({
     errorMap: () => ({ message: "Expense type must be Fixed or Variable" }),
   }),
   expense_date: z.string().optional(),
+  payment_mode: z.string().optional(),
+  is_settled: z.boolean().optional(),
+  is_cc_payment: z.boolean().optional(),
   captchaText: z.string().min(1, "CAPTCHA is required"),
+});
+
+export const editExpenseZodSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(3, "Expense name must be at least 3 characters")
+    .max(100, "Expense name cannot exceed 100 characters")
+    .regex(/^[a-zA-Z0-9\s_\-\/()]+$/, "Only letters, numbers, spaces, dash, underscore, forward slash, and parentheses are allowed"),
+  amount: z
+    .string()
+    .min(1, "Expense amount is required")
+    .refine((val) => !/[eE]/.test(val) && !isNaN(Number(val)) && Number(val) > 0, {
+      message: "Scientific notation is not allowed. Must be a valid positive number.",
+    }),
+  category_id: z.string().optional(),
+  type: z.enum(["Fixed", "Variable"], {
+    errorMap: () => ({ message: "Expense type must be Fixed or Variable" }),
+  }),
+  expense_date: z.string().optional(),
+  payment_mode: z.string().optional(),
+  is_settled: z.boolean().optional(),
+  is_cc_payment: z.boolean().optional(),
+  captchaText: z.string().optional(),
 });
 
 export const bulkExpenseRowZodSchema = z.object({
@@ -130,8 +166,8 @@ export const bulkExpenseRowZodSchema = z.object({
     .min(3, "Please enter a valid expense name. It must be of at least 3 characters and can be of at most 100 characters.")
     .max(100, "Please enter a valid expense name. It must be of at least 3 characters and can be of at most 100 characters.")
     .regex(
-      /^[a-zA-Z0-9\s_\-\/]+$/,
-      "Expense Name can only contain letters, numbers, spaces, dash, underscore, and forward slash."
+      /^[a-zA-Z0-9\s_\-\/()]+$/,
+      "Expense Name can only contain letters, numbers, spaces, dash, underscore, forward slash, and parentheses."
     ),
   amount: z
     .string()

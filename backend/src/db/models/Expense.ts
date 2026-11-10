@@ -14,6 +14,8 @@ export interface ExpenseAttributes {
   bill_url?: string | null;
   bill_original_name?: string | null;
   bill_mime_type?: string | null;
+  payment_mode?: string | null;
+  is_settled?: boolean;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -29,6 +31,8 @@ export class Expense extends Model<ExpenseAttributes> implements ExpenseAttribut
   declare public bill_url: string | null;
   declare public bill_original_name: string | null;
   declare public bill_mime_type: string | null;
+  declare public payment_mode: string | null;
+  declare public is_settled: boolean;
   declare public readonly created_at: Date;
   declare public readonly updated_at: Date;
 }
@@ -84,6 +88,16 @@ Expense.init(
     bill_mime_type: {
       type: DataTypes.STRING(100),
       allowNull: true,
+    },
+    payment_mode: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      defaultValue: 'Cash',
+    },
+    is_settled: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
   },
   {

@@ -12,8 +12,12 @@ router.post("/bulk-upload", authMiddleware, uploadBulkTemplate.any(), ExpenseCon
 router.get("/template", ExpenseController.downloadBulkTemplate);
 router.get("/bulk-template", ExpenseController.downloadBulkTemplate);
 router.get("/", authMiddleware, ExpenseController.getAll);
+router.post("/paginate", authMiddleware, ExpenseController.paginate);
 router.get("/:id/bill", authMiddleware, ExpenseController.downloadBill);
 router.post("/:id/bill", authMiddleware, uploadBill.single("bill"), ExpenseController.uploadBill);
+router.put("/:id", authMiddleware, uploadBill.single("bill"), ExpenseController.update);
+router.patch("/:id", authMiddleware, uploadBill.single("bill"), ExpenseController.update);
+router.post("/:id/update", authMiddleware, uploadBill.single("bill"), ExpenseController.update);
 router.post("/:id/delete", authMiddleware, ExpenseController.delete);
 router.delete("/:id", authMiddleware, ExpenseController.delete);
 

@@ -265,7 +265,7 @@ export const useDashboardGraph = (metrics, selectedMonth) => {
       if (graphType === "pie") {
         return {
           title: {
-            text: `Monthly Cashflow Breakdown - ${selectedMonth}`,
+            text: `Cashflow Breakdown - ${selectedMonth}`,
             left: "center",
             top: 8,
             textStyle: { fontSize: 15, fontWeight: 700, color: "#1e293b" },

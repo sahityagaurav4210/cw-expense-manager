@@ -2,3 +2,5 @@ ALTER TABLE IF EXISTS "public"."expenses" ALTER COLUMN "name" TYPE VARCHAR(100);
 ALTER TABLE IF EXISTS "public"."expenses" ADD COLUMN IF NOT EXISTS "bill_url" VARCHAR(255);
 ALTER TABLE IF EXISTS "public"."expenses" ADD COLUMN IF NOT EXISTS "bill_original_name" VARCHAR(255);
 ALTER TABLE IF EXISTS "public"."expenses" ADD COLUMN IF NOT EXISTS "bill_mime_type" VARCHAR(100);
+ALTER TABLE IF EXISTS "public"."expenses" ADD COLUMN IF NOT EXISTS "payment_mode" VARCHAR(100) DEFAULT 'Cash';
+ALTER TABLE IF EXISTS "public"."expenses" ADD COLUMN IF NOT EXISTS "is_settled" BOOLEAN DEFAULT false;

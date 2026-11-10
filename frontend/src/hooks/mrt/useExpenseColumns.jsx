@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Chip,
@@ -11,25 +11,23 @@ import {
   DialogActions,
   Button,
   CircularProgress,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import DownloadIcon from "@mui/icons-material/Download";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import CloseIcon from "@mui/icons-material/Close";
-import dayjs from "dayjs";
-import {
-  downloadExpenseBillApi,
-  uploadExpenseBillApi,
-} from "../../services/expense.service";
-import PDFViewer from "../../components/core/PDFViewer";
-import FileUploaderV2 from "../../components/core/FileUploaderV2";
-import AppDialogTitle from "../../components/core/AppDialogTitle";
-import { useUI } from "../../context/UIContext";
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import DownloadIcon from '@mui/icons-material/Download';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import CloseIcon from '@mui/icons-material/Close';
+import dayjs from 'dayjs';
+import { downloadExpenseBillApi, uploadExpenseBillApi } from '../../services/expense.service';
+import PDFViewer from '../../components/core/PDFViewer';
+import FileUploaderV2 from '../../components/core/FileUploaderV2';
+import AppDialogTitle from '../../components/core/AppDialogTitle';
+import { useUI } from '../../context/UIContext';
 
-export const expenseDefaultSorting = [{ id: "id", desc: true }];
+export const expenseDefaultSorting = [{ id: 'id', desc: true }];
 
-export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
+export const useExpenseColumns = ({ onEdit, onDelete, onViewBill, onBillUploaded }) => {
   const { showAlert } = useUI();
   const [activePdf, setActivePdf] = useState(null);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -38,14 +36,14 @@ export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
   const handleDownloadBill = async (expense) => {
     try {
       const res = await downloadExpenseBillApi(expense.id);
-      const mimeType = res.headers["content-type"] || "application/pdf";
+      const mimeType = res.headers['content-type'] || 'application/pdf';
       const blob = new Blob([res.data], { type: mimeType });
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = url;
       let filename = expense.bill_original_name || `bill-${expense.id}.pdf`;
-      if (mimeType.includes("pdf") && !filename.toLowerCase().endsWith(".pdf")) {
-        filename += ".pdf";
+      if (mimeType.includes('pdf') && !filename.toLowerCase().endsWith('.pdf')) {
+        filename += '.pdf';
       }
       link.download = filename;
       document.body.appendChild(link);
@@ -53,7 +51,7 @@ export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
       document.body.removeChild(link);
       setTimeout(() => window.URL.revokeObjectURL(url), 1000);
     } catch (err) {
-      console.error("Failed to download decrypted bill:", err);
+      console.error('Failed to download decrypted bill:', err);
     }
   };
 
@@ -63,7 +61,7 @@ export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
       return;
     }
     setPdfLoading(true);
-    const title = expense.bill_original_name || expense.name || "Expense Bill Preview";
+    const title = expense.bill_original_name || expense.name || 'Expense Bill Preview';
     setActivePdf({
       open: true,
       id: expense.id,
@@ -74,7 +72,7 @@ export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
 
     try {
       const res = await downloadExpenseBillApi(expense.id);
-      const mimeType = res.headers["content-type"] || "application/pdf";
+      const mimeType = res.headers['content-type'] || 'application/pdf';
       const blob = new Blob([res.data], { type: mimeType });
       setActivePdf({
         open: true,
@@ -84,7 +82,7 @@ export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
         blob,
       });
     } catch (err) {
-      console.error("Failed to load PDF bill for preview:", err);
+      console.error('Failed to load PDF bill for preview:', err);
       setActivePdf(null);
     } finally {
       setPdfLoading(false);
@@ -120,23 +118,20 @@ export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
   const handleSubmitUpload = async () => {
     if (!uploadDialog?.file || !uploadDialog?.expense) return;
     if (!uploadDialog.isReady) {
-      showAlert("Please wait for file processing to complete.", "warning");
+      showAlert('Please wait for file processing to complete.', 'warning');
       return;
     }
 
     setUploadDialog((prev) => ({ ...prev, uploading: true }));
     try {
       await uploadExpenseBillApi(uploadDialog.expense.id, uploadDialog.file);
-      showAlert("Bill file attached and encrypted successfully!", "success");
+      showAlert('Bill file attached and encrypted successfully!', 'success');
       setUploadDialog(null);
       if (onBillUploaded) {
         onBillUploaded();
       }
     } catch (err) {
-      showAlert(
-        err.response?.data?.message || "Failed to upload bill file.",
-        "error"
-      );
+      showAlert(err.response?.data?.message || 'Failed to upload bill file.', 'error');
       setUploadDialog((prev) => (prev ? { ...prev, uploading: false } : null));
     }
   };
@@ -144,84 +139,109 @@ export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
   return useMemo(
     () => [
       {
-        accessorKey: "id",
-        header: "ID",
+        accessorKey: 'id',
+        header: 'ID',
         size: 70,
         sortDescFirst: true,
       },
       {
-        accessorKey: "name",
-        header: "Expense Name",
+        accessorKey: 'name',
+        header: 'Expense Name',
         size: 180,
       },
       {
-        accessorKey: "amount",
-        header: "Amount (₹)",
+        accessorKey: 'amount',
+        header: 'Amount (₹)',
         size: 130,
         Cell: ({ row }) => (
           <Typography variant="body2" fontWeight={700} color="primary.main">
-            ₹{parseFloat(row.original.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+            ₹{parseFloat(row.original.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </Typography>
         ),
       },
       {
-        accessorKey: "Category.name",
-        header: "Category",
+        accessorKey: 'Category.name',
+        header: 'Category',
         size: 150,
         Cell: ({ row }) => (
           <Chip
-            label={row.original.Category?.name || "Not Defined"}
+            label={row.original.Category?.name || 'Not Defined'}
             size="small"
-            color={row.original.Category?.name ? "primary" : "secondary"}
+            color={row.original.Category?.name ? 'primary' : 'secondary'}
             variant="outlined"
           />
         ),
       },
       {
-        accessorKey: "type",
-        header: "Type",
+        accessorKey: 'type',
+        header: 'Type',
         size: 120,
         Cell: ({ row }) => (
-          <Chip
-            label={row.original.type}
-            size="small"
-            color={row.original.type === "Fixed" ? "warning" : "info"}
-          />
+          <Chip label={row.original.type} size="small" color={row.original.type === 'Fixed' ? 'warning' : 'info'} />
         ),
       },
       {
-        accessorKey: "expense_date",
-        header: "Expense Date",
+        accessorKey: 'payment_mode',
+        header: 'Payment Mode',
+        size: 150,
+        Cell: ({ row }) => {
+          const mode = row.original.payment_mode || 'Cash';
+          const isCC = mode === 'Credit Card';
+          const isSettled = Boolean(row.original.is_settled);
+
+          return (
+            <Box display="flex" alignItems="center" gap={0.5} flexWrap="wrap">
+              <Chip
+                label={mode}
+                size="small"
+                color={isCC ? 'secondary' : mode === 'UPI' ? 'info' : mode === 'Cash' ? 'success' : 'default'}
+                variant="outlined"
+              />
+              {isCC && (
+                <Chip
+                  label={isSettled ? 'Settled' : 'Pending Dues'}
+                  size="small"
+                  color={isSettled ? 'success' : 'warning'}
+                  sx={{ height: 20, fontSize: '0.68rem' }}
+                />
+              )}
+            </Box>
+          );
+        },
+      },
+      {
+        accessorKey: 'expense_date',
+        header: 'Expense Date',
         size: 130,
         Cell: ({ row }) => (
           <Typography variant="caption">
-            {row.original.expense_date ? dayjs(row.original.expense_date).format("YYYY-MM-DD") : "N/A"}
+            {row.original.expense_date ? dayjs(row.original.expense_date).format('YYYY-MM-DD') : 'N/A'}
           </Typography>
         ),
       },
       {
-        id: "actions",
-        header: "Actions",
-        size: 160,
+        id: 'actions',
+        header: 'Actions',
+        size: 180,
         Cell: ({ row }) => (
           <Box display="flex" alignItems="center" gap={0.5}>
+            {onEdit && (
+              <Tooltip title="Edit Expense">
+                <IconButton size="small" color="primary" onClick={() => onEdit(row.original)}>
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+
             {row.original.bill_url && (
               <>
                 <Tooltip title="View Bill (PDF Viewer)">
-                  <IconButton
-                    size="small"
-                    color="primary"
-                    onClick={() => handleOpenPdfViewer(row.original)}
-                  >
+                  <IconButton size="small" color="primary" onClick={() => handleOpenPdfViewer(row.original)}>
                     <VisibilityIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Download Decrypted Bill">
-                  <IconButton
-                    size="small"
-                    color="secondary"
-                    onClick={() => handleDownloadBill(row.original)}
-                  >
+                  <IconButton size="small" color="secondary" onClick={() => handleDownloadBill(row.original)}>
                     <DownloadIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
@@ -229,18 +249,8 @@ export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
             )}
 
             {/* Option to add or update bill file */}
-            <Tooltip
-              title={
-                row.original.bill_url
-                  ? "Update / Replace Bill File"
-                  : "Add Bill File"
-              }
-            >
-              <IconButton
-                size="small"
-                color="info"
-                onClick={() => handleOpenUploadDialog(row.original)}
-              >
+            <Tooltip title={row.original.bill_url ? 'Update / Replace Bill File' : 'Add Bill File'}>
+              <IconButton size="small" color="info" onClick={() => handleOpenUploadDialog(row.original)}>
                 <UploadFileIcon fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -258,7 +268,16 @@ export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
                 onClose={handleCloseUploadDialog}
                 maxWidth="sm"
                 fullWidth
-                PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
+                PaperProps={{
+                  sx: {
+                    borderRadius: 3,
+                    p: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    maxHeight: 'calc(100% - 64px)',
+                    overflow: 'hidden',
+                  },
+                }}
               >
                 <AppDialogTitle
                   title={
@@ -267,40 +286,24 @@ export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
                       : `Attach Bill File - ${uploadDialog.expense.name}`
                   }
                   onClose={handleCloseUploadDialog}
-                  Icon={<UploadFileIcon sx={{ color: "white" }} />}
+                  Icon={<UploadFileIcon sx={{ color: 'white' }} />}
                 />
-                <DialogContent dividers sx={{ p: 2.5 }}>
+                <DialogContent dividers sx={{ p: 2.5, overflowY: 'auto' }}>
                   {uploadDialog.expense.bill_url && (
-                    <Box
-                      mb={2}
-                      p={1.5}
-                      bgcolor="#f1f5f9"
-                      borderRadius={2}
-                      border="1px solid #e2e8f0"
-                    >
-                      <Typography
-                        variant="caption"
-                        fontWeight={600}
-                        color="text.secondary"
-                        display="block"
-                      >
+                    <Box mb={2} p={1.5} bgcolor="#f1f5f9" borderRadius={2} border="1px solid #e2e8f0">
+                      <Typography variant="caption" fontWeight={600} color="text.secondary" display="block">
                         Currently Attached File:
                       </Typography>
                       <Typography variant="body2" fontWeight={700} color="primary.main">
-                        {uploadDialog.expense.bill_original_name || "Existing Bill"}
+                        {uploadDialog.expense.bill_original_name || 'Existing Bill'}
                       </Typography>
                     </Box>
                   )}
 
-                  <Typography
-                    variant="body2"
-                    fontWeight={600}
-                    color="text.primary"
-                    mb={1.5}
-                  >
+                  <Typography variant="body2" fontWeight={600} color="text.primary" mb={1.5}>
                     {uploadDialog.expense.bill_url
-                      ? "Select a new file to replace the existing bill:"
-                      : "Upload a receipt or invoice file for this expense:"}
+                      ? 'Select a new file to replace the existing bill:'
+                      : 'Upload a receipt or invoice file for this expense:'}
                   </Typography>
 
                   <FileUploaderV2
@@ -324,22 +327,10 @@ export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
                     onClick={handleSubmitUpload}
                     variant="contained"
                     color="primary"
-                    disabled={
-                      !uploadDialog.file ||
-                      !uploadDialog.isReady ||
-                      uploadDialog.uploading
-                    }
-                    startIcon={
-                      uploadDialog.uploading ? (
-                        <CircularProgress size={16} color="inherit" />
-                      ) : null
-                    }
+                    disabled={!uploadDialog.file || !uploadDialog.isReady || uploadDialog.uploading}
+                    startIcon={uploadDialog.uploading ? <CircularProgress size={16} color="inherit" /> : null}
                   >
-                    {uploadDialog.uploading
-                      ? "Uploading..."
-                      : uploadDialog.expense.bill_url
-                      ? "Update Bill"
-                      : "Attach Bill"}
+                    {uploadDialog.uploading ? 'Uploading...' : uploadDialog.expense.bill_url ? 'Update Bill' : 'Attach Bill'}
                   </Button>
                 </DialogActions>
               </Dialog>
@@ -352,14 +343,22 @@ export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
                 onClose={handleClosePdf}
                 maxWidth="md"
                 fullWidth
-                PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
+                PaperProps={{
+                  sx: {
+                    borderRadius: 3,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    maxHeight: 'calc(100% - 64px)',
+                    overflow: 'hidden',
+                  },
+                }}
               >
                 <AppDialogTitle
-                  title={activePdf.title || "Bill Preview"}
+                  title={activePdf.title || 'Bill Preview'}
                   onClose={handleClosePdf}
-                  Icon={<VisibilityIcon sx={{ color: "white" }} />}
+                  Icon={<VisibilityIcon sx={{ color: 'white', mr: 1 }} />}
                 />
-                <DialogContent dividers sx={{ p: 2 }}>
+                <DialogContent dividers sx={{ p: 2, overflowY: 'auto' }}>
                   {pdfLoading ? (
                     <Box display="flex" justifyContent="center" alignItems="center" p={6}>
                       <CircularProgress color="primary" />
@@ -383,6 +382,6 @@ export const useExpenseColumns = ({ onDelete, onViewBill, onBillUploaded }) => {
         ),
       },
     ],
-    [onDelete, activePdf, pdfLoading, uploadDialog]
+    [onEdit, onDelete, activePdf, pdfLoading, uploadDialog],
   );
 };

@@ -114,8 +114,18 @@ const CategoryManager = () => {
           onClose={handleCloseModal}
           Icon={<CategoryIcon sx={{ color: "white" }} />}
         />
-        <Box component="form" onSubmit={requestCreateConfirmation}>
-          <DialogContent dividers>
+        <Box
+          component="form"
+          onSubmit={requestCreateConfirmation}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+            overflow: "hidden",
+            minHeight: 0,
+          }}
+        >
+          <DialogContent dividers sx={{ overflowY: "auto" }}>
             <Box display="flex" flexDirection="column" gap={2}>
               <TextField
                 label="Category Name"

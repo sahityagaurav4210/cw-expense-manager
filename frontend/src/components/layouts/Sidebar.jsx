@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Drawer,
   List,
@@ -13,40 +13,32 @@ import {
   IconButton,
   useTheme,
   Tooltip,
-} from "@mui/material";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import AssessmentIcon from "@mui/icons-material/Assessment";
-import CategoryIcon from "@mui/icons-material/Category";
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import LogoutIcon from "@mui/icons-material/Logout";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import SettingsIcon from "@mui/icons-material/Settings";
-import HandshakeIcon from "@mui/icons-material/Handshake";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { resolvePhotoUrl } from "../../views/Profile/UserProfile";
+} from '@mui/material';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import CategoryIcon from '@mui/icons-material/Category';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import LogoutIcon from '@mui/icons-material/Logout';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import SettingsIcon from '@mui/icons-material/Settings';
+import HandshakeIcon from '@mui/icons-material/Handshake';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { resolvePhotoUrl } from '../../views/Profile/UserProfile';
 
 const DRAWER_WIDTH_EXPANDED = 240;
 const DRAWER_WIDTH_COLLAPSED = 76;
 
-const Sidebar = ({
-  open,
-  onClose,
-  onLogout,
-  isExpanded: controlledExpanded,
-  expandable = false,
-  onExpandChange,
-}) => {
+const Sidebar = ({ open, onClose, onLogout, isExpanded: controlledExpanded, expandable = false, onExpandChange }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useSelector((state) => state.auth);
   const [internalExpanded, setInternalExpanded] = useState(true);
 
-  const isExpanded =
-    controlledExpanded !== undefined ? controlledExpanded : internalExpanded;
+  const isExpanded = controlledExpanded !== undefined ? controlledExpanded : internalExpanded;
 
   useEffect(() => {
     if (onExpandChange) {
@@ -54,35 +46,29 @@ const Sidebar = ({
     }
   }, [isExpanded, onExpandChange]);
 
-  const currentWidth =
-    expandable && !isExpanded ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH_EXPANDED;
+  const currentWidth = expandable && !isExpanded ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH_EXPANDED;
 
   const navItems = [
-    { label: "User Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
-    { label: "Reports", path: "/reports", icon: <AssessmentIcon /> },
+    { label: 'User Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
+    { label: 'Reports', path: '/reports', icon: <AssessmentIcon /> },
     {
-      label: "Category Management",
-      path: "/categories",
-      icon: <CategoryIcon />,
-    },
-    {
-      label: "Budget Allocation",
-      path: "/budget",
+      label: 'Budget Allocation',
+      path: '/budget',
       icon: <AccountBalanceWalletIcon />,
     },
     {
-      label: "Expense Management",
-      path: "/expenses",
+      label: 'Expense Management',
+      path: '/expenses',
       icon: <ReceiptLongIcon />,
     },
     {
-      label: "Debts & Receivables",
-      path: "/debts",
+      label: 'Debts & Receivables',
+      path: '/debts',
       icon: <HandshakeIcon />,
     },
     {
-      label: "Settings",
-      path: "/settings",
+      label: 'Settings',
+      path: '/settings',
       icon: <SettingsIcon />,
     },
   ];
@@ -96,38 +82,27 @@ const Sidebar = ({
         justifyContent="center"
         bgcolor="primary.main"
         color="#fff"
-        sx={{ transition: "padding 0.3s", position: "relative", minHeight: 68 }}
+        sx={{ transition: 'padding 0.3s', position: 'relative', minHeight: 68 }}
       >
         {(() => {
           const photoUrl = resolvePhotoUrl(user?.profile_photo || user?.profile_photo_url);
           return isExpanded ? (
             <Box display="flex" alignItems="center" gap={1.5} width="100%">
-              <Avatar
-                src={photoUrl || undefined}
-                sx={{ bgcolor: "secondary.main", width: 36, height: 36 }}
-              >
+              <Avatar src={photoUrl || undefined} sx={{ bgcolor: 'secondary.main', width: 36, height: 36 }}>
                 {!photoUrl && <AccountCircleIcon />}
               </Avatar>
 
               <Box overflow="hidden" flexGrow={1}>
                 <Typography variant="subtitle2" fontWeight={700} noWrap>
-                  {user?.name || "CW User"}
+                  {user?.name || 'CW User'}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{ opacity: 0.8 }}
-                  noWrap
-                  display="block"
-                >
-                  {user?.employment_type || "Salaried"}
+                <Typography variant="caption" sx={{ opacity: 0.8 }} noWrap display="block">
+                  {user?.employment_type || 'Salaried'}
                 </Typography>
               </Box>
             </Box>
           ) : (
-            <Avatar
-              src={photoUrl || undefined}
-              sx={{ bgcolor: "secondary.main", width: 36, height: 36 }}
-            >
+            <Avatar src={photoUrl || undefined} sx={{ bgcolor: 'secondary.main', width: 36, height: 36 }}>
               {!photoUrl && <AccountCircleIcon />}
             </Avatar>
           );
@@ -135,11 +110,7 @@ const Sidebar = ({
 
         {/* Mobile close button overrides expandable */}
         {onClose && !expandable && (
-          <IconButton
-            onClick={onClose}
-            sx={{ color: "#fff", position: "absolute", right: 8 }}
-            size="small"
-          >
+          <IconButton onClick={onClose} sx={{ color: '#fff', position: 'absolute', right: 8 }} size="small">
             <ChevronLeftIcon />
           </IconButton>
         )}
@@ -160,22 +131,22 @@ const Sidebar = ({
               sx={{
                 mx: isExpanded ? 1 : 0.5,
                 px: isExpanded ? 2 : 0,
-                justifyContent: isExpanded ? "flex-start" : "center",
+                justifyContent: isExpanded ? 'flex-start' : 'center',
                 borderRadius: 2,
-                "&.Mui-selected": {
-                  bgcolor: "primary.main",
-                  color: "#fff",
-                  "& .MuiListItemIcon-root": { color: "#fff" },
-                  "&:hover": { bgcolor: "primary.hover" },
+                '&.Mui-selected': {
+                  bgcolor: 'primary.main',
+                  color: '#fff',
+                  '& .MuiListItemIcon-root': { color: '#fff' },
+                  '&:hover': { bgcolor: 'primary.hover' },
                 },
-                transition: "margin 0.3s, padding 0.3s",
+                transition: 'margin 0.3s, padding 0.3s',
               }}
             >
               <ListItemIcon
                 sx={{
-                  minWidth: isExpanded ? 40 : "auto",
-                  color: isSelected ? "#fff" : "primary.main",
-                  justifyContent: "center",
+                  minWidth: isExpanded ? 40 : 'auto',
+                  color: isSelected ? '#fff' : 'primary.main',
+                  justifyContent: 'center',
                 }}
               >
                 {item.icon}
@@ -184,7 +155,7 @@ const Sidebar = ({
                 <ListItemText
                   primary={item.label}
                   primaryTypographyProps={{
-                    fontSize: "0.875rem",
+                    fontSize: '0.875rem',
                     fontWeight: isSelected ? 600 : 500,
                   }}
                 />
@@ -193,7 +164,7 @@ const Sidebar = ({
           );
 
           return (
-            <ListItem key={item.path} disablePadding sx={{ display: "block", mb: 0.5 }}>
+            <ListItem key={item.path} disablePadding sx={{ display: 'block', mb: 0.5 }}>
               {!isExpanded ? (
                 <Tooltip title={item.label} placement="right" arrow>
                   {buttonContent}
@@ -214,17 +185,14 @@ const Sidebar = ({
             onClick={onLogout}
             sx={{
               borderRadius: 2,
-              color: "error.main",
-              "&:hover": { bgcolor: "error.light", color: "error.contrastText" },
+              color: 'error.main',
+              '&:hover': { bgcolor: 'error.light', color: 'error.contrastText' },
             }}
           >
-            <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
+            <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
               <LogoutIcon />
             </ListItemIcon>
-            <ListItemText
-              primary="Logout"
-              primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: 600 }}
-            />
+            <ListItemText primary="Logout" primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 600 }} />
           </ListItemButton>
         ) : (
           <Tooltip title="Logout" placement="right" arrow>
@@ -246,9 +214,9 @@ const Sidebar = ({
         onClose={onClose}
         ModalProps={{ keepMounted: true }}
         sx={{
-          display: { xs: "block", md: "none" },
-          "& .MuiDrawer-paper": {
-            boxSizing: "border-box",
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': {
+            boxSizing: 'border-box',
             width: DRAWER_WIDTH_EXPANDED,
           },
         }}
@@ -260,18 +228,18 @@ const Sidebar = ({
       <Drawer
         variant="permanent"
         sx={{
-          display: { xs: "none", md: "block" },
+          display: { xs: 'none', md: 'block' },
           width: currentWidth,
           flexShrink: 0,
-          "& .MuiDrawer-paper": {
-            boxSizing: "border-box",
+          '& .MuiDrawer-paper': {
+            boxSizing: 'border-box',
             width: currentWidth,
-            transition: theme.transitions.create("width", {
+            transition: theme.transitions.create('width', {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
-            overflowX: "hidden",
-            borderRight: "1px solid rgba(0, 0, 0, 0.12)",
+            overflowX: 'hidden',
+            borderRight: '1px solid rgba(0, 0, 0, 0.12)',
           },
         }}
         open

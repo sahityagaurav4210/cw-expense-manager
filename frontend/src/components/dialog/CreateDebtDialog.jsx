@@ -108,8 +108,18 @@ const CreateDebtDialog = ({
         onClose={onClose}
         Icon={<HandshakeIcon sx={{ color: "white" }} />}
       />
-      <Box component="form" onSubmit={onSubmit}>
-        <DialogContent dividers>
+      <Box
+        component="form"
+        onSubmit={onSubmit}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          overflow: "hidden",
+          minHeight: 0,
+        }}
+      >
+        <DialogContent dividers sx={{ overflowY: "auto" }}>
           <Box display="flex" flexDirection="column" gap={2}>
             {/* Transaction Type */}
             <TextField

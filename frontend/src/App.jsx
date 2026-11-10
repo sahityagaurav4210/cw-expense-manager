@@ -15,6 +15,8 @@ import {
   CircularProgress,
 } from "@mui/material";
 import AppTheme from "./theme/AppTheme";
+import createCache from "@emotion/cache";
+import { CacheProvider } from "@emotion/react";
 import { UIProvider } from "./context/UIContext";
 import { AuthProvider } from "./context/AuthContext";
 import { Provider, useSelector, useDispatch } from "react-redux";
@@ -34,6 +36,7 @@ import Register from "./views/Auth/Register";
 import Login from "./views/Auth/Login";
 import ForgotPassword from "./views/Auth/ForgotPassword";
 import CategoryManager from "./views/Category/CategoryManager";
+import PaymentOptionsManager from "./views/PaymentOptions/PaymentOptionsManager";
 import BudgetAllocation from "./views/Budget/BudgetAllocation";
 import ExpenseManager from "./views/Expense/ExpenseManager";
 import UserDashboard from "./views/Dashboard/UserDashboard";
@@ -290,6 +293,14 @@ const MainLayout = () => {
                 }
               />
               <Route
+                path="/payment-options"
+                element={
+                  <ProtectedRoute>
+                    <PaymentOptionsManager />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/budget"
                 element={
                   <ProtectedRoute>
@@ -348,22 +359,36 @@ const MainLayout = () => {
   );
 };
 
+// Emotion Cache with dynamic CSP Nonce support for Material-UI styles
+const emotionCache = createCache({
+  key: "css",
+  nonce:
+    typeof window !== "undefined" &&
+    window.__CSP_NONCE__ &&
+    window.__CSP_NONCE__ !== "__CSP_NONCE__"
+      ? window.__CSP_NONCE__
+      : undefined,
+  prepend: true,
+});
+
 function App() {
   const theme = AppTheme(14);
 
   return (
-    <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <UIProvider>
-          <BrowserRouter>
-            <AuthProvider>
-              <MainLayout />
-            </AuthProvider>
-          </BrowserRouter>
-        </UIProvider>
-      </ThemeProvider>
-    </Provider>
+    <CacheProvider value={emotionCache}>
+      <Provider store={store}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <UIProvider>
+            <BrowserRouter>
+              <AuthProvider>
+                <MainLayout />
+              </AuthProvider>
+            </BrowserRouter>
+          </UIProvider>
+        </ThemeProvider>
+      </Provider>
+    </CacheProvider>
   );
 }
 

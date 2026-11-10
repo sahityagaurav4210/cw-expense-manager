@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Box, CircularProgress, Typography, Button, Paper } from "@mui/material";
-import DownloadIcon from "@mui/icons-material/Download";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import React, { useEffect, useState } from 'react';
+import { Box, CircularProgress, Typography, Button, Paper } from '@mui/material';
+import DownloadIcon from '@mui/icons-material/Download';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 /**
  * PDFViewer component for showing PDF blobs received from backend API.
@@ -13,9 +13,9 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
  */
 const PDFViewer = ({
   pdfData,
-  title = "Expense Report PDF",
-  filename = "expense_report.pdf",
-  height = "600px",
+  title = 'Expense Report PDF',
+  filename = 'expense_report.pdf',
+  height = '600px',
   onDownload,
   downloading = false,
 }) => {
@@ -26,8 +26,8 @@ const PDFViewer = ({
   useEffect(() => {
     if (!pdfData) return;
 
-    let url = "";
-    if (typeof pdfData === "string") {
+    let url = '';
+    if (typeof pdfData === 'string') {
       url = pdfData;
     } else if (pdfData instanceof Blob || pdfData instanceof File) {
       url = URL.createObjectURL(pdfData);
@@ -64,8 +64,8 @@ const PDFViewer = ({
 
   if (!objectUrl) {
     return (
-      <Paper sx={{ p: 3, textAlign: "center", bgcolor: "background.default" }}>
-        <PictureAsPdfIcon sx={{ fontSize: 48, color: "text.secondary", mb: 1 }} />
+      <Paper sx={{ p: 3, textAlign: 'center', bgcolor: 'background.default' }}>
+        <PictureAsPdfIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
         <Typography color="text.secondary">No PDF document available to display.</Typography>
       </Paper>
     );
@@ -74,36 +74,23 @@ const PDFViewer = ({
   return (
     <Box display="flex" flexDirection="column" gap={1.5} width="100%">
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h6" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
           <PictureAsPdfIcon color="error" />
           {title}
         </Typography>
         <Button
           variant="contained"
           size="small"
-          startIcon={
-            downloading ? (
-              <CircularProgress size={16} color="inherit" />
-            ) : (
-              <DownloadIcon />
-            )
-          }
+          startIcon={downloading ? <CircularProgress size={16} color="inherit" /> : <DownloadIcon />}
           onClick={handleDownload}
           disabled={downloading}
-          sx={{ textTransform: "none", minWidth: 140 }}
+          sx={{ textTransform: 'none', minWidth: 140 }}
         >
-          {downloading ? "Downloading..." : "Download PDF"}
+          {downloading ? 'Downloading...' : 'Download PDF'}
         </Button>
       </Box>
-      <Paper elevation={2} sx={{ overflow: "hidden", borderRadius: 2 }}>
-        <iframe
-          ref={iframeRef}
-          src={objectUrl}
-          title={title}
-          width="100%"
-          height={height}
-          style={{ border: "none" }}
-        />
+      <Paper elevation={2} sx={{ overflow: 'hidden', borderRadius: 2 }}>
+        <iframe ref={iframeRef} src={objectUrl} title={title} width="100%" height={height} style={{ border: 'none' }} />
       </Paper>
     </Box>
   );

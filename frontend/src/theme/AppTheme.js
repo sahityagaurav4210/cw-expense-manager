@@ -61,6 +61,34 @@ const AppTheme = (fontSize = 14) =>
         },
       },
       MuiPaper: { styleOverrides: { root: { borderRadius: 12 } } },
+      MuiDialog: {
+        defaultProps: {
+          scroll: "paper",
+        },
+        styleOverrides: {
+          paper: {
+            display: "flex",
+            flexDirection: "column",
+            maxHeight: "calc(100% - 64px)",
+            overflow: "hidden",
+            "& > form, & > div[component='form']": {
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              overflow: "hidden",
+              minHeight: 0,
+            },
+          },
+        },
+      },
+      MuiDialogContent: {
+        styleOverrides: {
+          root: {
+            flex: "1 1 auto",
+            overflowY: "auto",
+          },
+        },
+      },
       MuiChip: { styleOverrides: { root: { borderRadius: 16 } } },
       MuiTextField: {
         defaultProps: {

@@ -5,12 +5,16 @@
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CW Expense Tracker</title>
+    <!-- Expose CSP Nonce to window for runtime CSS/script usage -->
+    <script nonce="__CSP_NONCE__">
+      window.__CSP_NONCE__ = '__CSP_NONCE__';
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <script type="module" nonce="__CSP_NONCE__" src="/src/main.jsx"></script>
   </body>
 </html>
