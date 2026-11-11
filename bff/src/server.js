@@ -18,7 +18,11 @@ const EXT_SERVER_HOST = process.env.EXT_SERVER_HOST || `http://${SERVER_HOST}:${
 const APP_VERSION = process.env.APP_VERSION || '0.0.0';
 
 async function bootstrap() {
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
   app.use(
     cors({
       origin: allowedOrigins,

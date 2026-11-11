@@ -1,21 +1,12 @@
-import React from "react";
-import {
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Chip,
-  LinearProgress,
-  Stack,
-  Divider,
-} from "@mui/material";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import TrendingDownIcon from "@mui/icons-material/TrendingDown";
-import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import ReceiptIcon from "@mui/icons-material/Receipt";
-import TopDownAnimation from "../animation/TopDownAnimation";
-import CountDownAnimation from "../animation/CountDownAnimation";
+import React from 'react';
+import { Card, CardContent, Typography, Box, Chip, LinearProgress, Stack, Divider } from '@mui/material';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import TopDownAnimation from '../animation/TopDownAnimation';
+import CountDownAnimation from '../animation/CountDownAnimation';
 
 const ExpenditureCard = ({ item }) => {
   if (!item) return null;
@@ -35,15 +26,15 @@ const ExpenditureCard = ({ item }) => {
       elevation={isCurrentMonth ? 4 : 2}
       sx={{
         borderRadius: 3,
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-        border: isCurrentMonth ? "2px solid #000080" : "1px solid #e2e8f0",
-        transition: "all 0.25s ease-in-out",
-        "&:hover": {
-          boxShadow: "0 8px 24px rgba(0, 0, 128, 0.12)",
-          transform: "translateY(-3px)",
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        border: isCurrentMonth ? '2px solid #000080' : '1px solid #e2e8f0',
+        transition: 'all 0.25s ease-in-out',
+        '&:hover': {
+          boxShadow: '0 8px 24px rgba(0, 0, 128, 0.12)',
+          transform: 'translateY(-3px)',
         },
       }}
     >
@@ -51,28 +42,17 @@ const ExpenditureCard = ({ item }) => {
       <Box
         sx={{
           height: 6,
-          bgcolor: isCurrentMonth
-            ? "primary.main"
-            : isLastMonth
-              ? "#2563eb"
-              : "#cbd5e1",
+          bgcolor: isCurrentMonth ? 'primary.main' : isLastMonth ? '#2563eb' : '#cbd5e1',
         }}
       />
 
-      <CardContent
-        sx={{ p: 3, flexGrow: 1, display: "flex", flexDirection: "column" }}
-      >
+      <CardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         {/* Header row with Month Name & Badge */}
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="flex-start"
-          mb={1.5}
-        >
+        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1.5}>
           <Box display="flex" alignItems="center" gap={1}>
             <CalendarMonthIcon
               sx={{
-                color: isCurrentMonth ? "primary.main" : "text.secondary",
+                color: isCurrentMonth ? 'primary.main' : 'text.secondary',
                 fontSize: 22,
               }}
             />
@@ -86,10 +66,10 @@ const ExpenditureCard = ({ item }) => {
               label="Current Month"
               size="small"
               sx={{
-                bgcolor: "primary.main",
-                color: "#ffffff",
+                bgcolor: 'primary.main',
+                color: '#ffffff',
                 fontWeight: 700,
-                fontSize: "0.72rem",
+                fontSize: '0.72rem',
                 height: 24,
               }}
             />
@@ -100,10 +80,10 @@ const ExpenditureCard = ({ item }) => {
               label="Last Month"
               size="small"
               sx={{
-                bgcolor: "#e0f2fe",
-                color: "#0369a1",
+                bgcolor: '#e0f2fe',
+                color: '#0369a1',
                 fontWeight: 700,
-                fontSize: "0.72rem",
+                fontSize: '0.72rem',
                 height: 24,
               }}
             />
@@ -116,16 +96,12 @@ const ExpenditureCard = ({ item }) => {
             Total Expenditure
           </Typography>
 
-          <TopDownAnimation
-            trigger={totalExpenditure}
-            delay={0.25}
-            duration={0.85}
-          >
+          <TopDownAnimation trigger={totalExpenditure} delay={0.25} duration={0.85}>
             <CountDownAnimation
               value={totalExpenditure}
               prefix="₹"
               decimals={2}
-              variant="h3"
+              variant="h4"
               fontWeight={800}
               duration={1}
               color="primary.main"
@@ -141,26 +117,18 @@ const ExpenditureCard = ({ item }) => {
               mt: 1.5,
               mb: 1.5,
               borderRadius: 2,
-              bgcolor: comparison.isHigher
-                ? "#fef2f2"
-                : comparison.isLower
-                  ? "#f0fdf4"
-                  : "#f8fafc",
-              border: "1px solid",
-              borderColor: comparison.isHigher
-                ? "#fecaca"
-                : comparison.isLower
-                  ? "#bbf7d0"
-                  : "#e2e8f0",
+              bgcolor: comparison.isHigher ? '#fef2f2' : comparison.isLower ? '#f0fdf4' : '#f8fafc',
+              border: '1px solid',
+              borderColor: comparison.isHigher ? '#fecaca' : comparison.isLower ? '#bbf7d0' : '#e2e8f0',
             }}
           >
             <Stack direction="row" alignItems="center" spacing={1}>
               {comparison.isHigher ? (
-                <TrendingUpIcon sx={{ color: "#dc2626", fontSize: 22 }} />
+                <TrendingUpIcon sx={{ color: '#dc2626', fontSize: 22 }} />
               ) : comparison.isLower ? (
-                <TrendingDownIcon sx={{ color: "#16a34a", fontSize: 22 }} />
+                <TrendingDownIcon sx={{ color: '#16a34a', fontSize: 22 }} />
               ) : (
-                <TrendingFlatIcon sx={{ color: "#64748b", fontSize: 22 }} />
+                <TrendingFlatIcon sx={{ color: '#64748b', fontSize: 22 }} />
               )}
 
               <Box flexGrow={1}>
@@ -168,38 +136,21 @@ const ExpenditureCard = ({ item }) => {
                   variant="body2"
                   fontWeight={700}
                   sx={{
-                    color: comparison.isHigher
-                      ? "#dc2626"
-                      : comparison.isLower
-                        ? "#16a34a"
-                        : "#64748b",
+                    color: comparison.isHigher ? '#dc2626' : comparison.isLower ? '#16a34a' : '#64748b',
                   }}
                 >
-                  {comparison.isHigher &&
-                    `▲ ${comparison.percentChange}% higher than last month`}
-                  {comparison.isLower &&
-                    `▼ ${comparison.percentChange}% lower than last month`}
-                  {comparison.isEqual && "0% difference from last month"}
+                  {comparison.isHigher && `▲ ${comparison.percentChange}% higher than last month`}
+                  {comparison.isLower && `▼ ${comparison.percentChange}% lower than last month`}
+                  {comparison.isEqual && '0% difference from last month'}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  display="block"
-                >
+                <Typography variant="caption" color="text.secondary" display="block">
                   Last Month: ₹
-                  {Number(comparison.previousMonthAmount).toLocaleString(
-                    "en-IN",
-                    {
-                      maximumFractionDigits: 2,
-                    },
-                  )}
+                  {Number(comparison.previousMonthAmount).toLocaleString('en-IN', {
+                    maximumFractionDigits: 2,
+                  })}
                   &nbsp;•&nbsp;
-                  {comparison.isHigher
-                    ? "Spent ₹"
-                    : comparison.isLower
-                      ? "Saved ₹"
-                      : "Diff ₹"}
-                  {Number(comparison.differenceAmount).toLocaleString("en-IN")}
+                  {comparison.isHigher ? 'Spent ₹' : comparison.isLower ? 'Saved ₹' : 'Diff ₹'}
+                  {Number(comparison.differenceAmount).toLocaleString('en-IN')}
                 </Typography>
               </Box>
             </Stack>
@@ -208,10 +159,9 @@ const ExpenditureCard = ({ item }) => {
 
         {/* Meta items count */}
         <Box display="flex" alignItems="center" gap={0.75} mt={0.5} mb={2}>
-          <ReceiptIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+          <ReceiptIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
           <Typography variant="caption" color="text.secondary" fontWeight={500}>
-            {expenseCount}{" "}
-            {expenseCount === 1 ? "expense entry" : "expense entries"} recorded
+            {expenseCount} {expenseCount === 1 ? 'expense entry' : 'expense entries'} recorded
           </Typography>
         </Box>
 
@@ -230,37 +180,19 @@ const ExpenditureCard = ({ item }) => {
           </Typography>
 
           {categoryBreakdown.length === 0 ? (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ py: 1, fontStyle: "italic" }}
-            >
+            <Typography variant="body2" color="text.secondary" sx={{ py: 1, fontStyle: 'italic' }}>
               No categorized expenses for this month.
             </Typography>
           ) : (
             <Stack spacing={1.25} mt={1}>
               {categoryBreakdown.slice(0, 3).map((cat, idx) => (
                 <Box key={idx}>
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    mb={0.5}
-                  >
-                    <Typography
-                      variant="caption"
-                      fontWeight={600}
-                      color="#334155"
-                      noWrap
-                    >
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+                    <Typography variant="caption" fontWeight={600} color="#334155" noWrap>
                       {cat.category}
                     </Typography>
-                    <Typography
-                      variant="caption"
-                      fontWeight={700}
-                      color="primary.main"
-                    >
-                      ₹{cat.amount.toLocaleString("en-IN")} ({cat.percentage}%)
+                    <Typography variant="caption" fontWeight={700} color="primary.main">
+                      ₹{cat.amount.toLocaleString('en-IN')} ({cat.percentage}%)
                     </Typography>
                   </Box>
                   <LinearProgress
@@ -269,14 +201,9 @@ const ExpenditureCard = ({ item }) => {
                     sx={{
                       height: 5,
                       borderRadius: 3,
-                      bgcolor: "#f1f5f9",
-                      "& .MuiLinearProgress-bar": {
-                        bgcolor:
-                          idx === 0
-                            ? "primary.main"
-                            : idx === 1
-                              ? "#2563eb"
-                              : "#38bdf8",
+                      bgcolor: '#f1f5f9',
+                      '& .MuiLinearProgress-bar': {
+                        bgcolor: idx === 0 ? 'primary.main' : idx === 1 ? '#2563eb' : '#38bdf8',
                       },
                     }}
                   />
@@ -284,12 +211,7 @@ const ExpenditureCard = ({ item }) => {
               ))}
 
               {categoryBreakdown.length > 3 && (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  align="right"
-                  display="block"
-                >
+                <Typography variant="caption" color="text.secondary" align="right" display="block">
                   +{categoryBreakdown.length - 3} more categories
                 </Typography>
               )}

@@ -12,6 +12,56 @@ export interface DashboardMetricsQuery {
 }
 
 export class DashboardService {
+  /**
+   * Finds the best matching budget for a given calendar month (YYYY-MM).
+   * 1. Exact calendar month match: from_date and to_date both fall in targetMonth.
+   * 2. Majority overlap match: Budget with the highest number of overlapping days in targetMonth (min 10 days overlap and >= 35% of total budget period).
+   */
+  public static findBudgetForMonth(userBudgets: any[], targetMonth: string) {
+    if (!userBudgets || userBudgets.length === 0 || !targetMonth) return null;
+
+    // 1. Exact calendar month match (e.g. 2026-10-01 to 2026-10-31)
+    const exactMatch = userBudgets.find((b) => {
+      if (!b.from_date || !b.to_date) return false;
+      const fromMonth = dayjs(b.from_date).format('YYYY-MM');
+      const toMonth = dayjs(b.to_date).format('YYYY-MM');
+      return fromMonth === targetMonth && toMonth === targetMonth;
+    });
+    if (exactMatch) return exactMatch;
+
+    // 2. Maximum overlap match (useful for salary cycles like 25th to 24th)
+    const mStart = dayjs(`${targetMonth}-01`);
+    const mEnd = mStart.endOf('month');
+
+    let bestBudget: any = null;
+    let maxOverlapDays = 0;
+
+    for (const b of userBudgets) {
+      if (!b.from_date || !b.to_date) continue;
+      const bStart = dayjs(b.from_date);
+      const bEnd = dayjs(b.to_date);
+
+      if (bEnd.isBefore(mStart, 'day') || bStart.isAfter(mEnd, 'day')) {
+        continue;
+      }
+
+      const start = bStart.isAfter(mStart) ? bStart : mStart;
+      const end = bEnd.isBefore(mEnd) ? bEnd : mEnd;
+      const overlap = end.diff(start, 'day') + 1;
+      const budgetTotalDays = bEnd.diff(bStart, 'day') + 1;
+
+      // Only consider if overlap is substantial (at least 10 days and at least 35% of the budget cycle)
+      if (overlap >= 10 && overlap / budgetTotalDays >= 0.35) {
+        if (overlap > maxOverlapDays) {
+          maxOverlapDays = overlap;
+          bestBudget = b;
+        }
+      }
+    }
+
+    return bestBudget;
+  }
+
   public static async getDashboardMetrics(
     userId: number,
     queryParam?: string | DashboardMetricsQuery,
@@ -76,22 +126,8 @@ export class DashboardService {
       );
     }
 
-    const isExplicitMonthMode = options.budgetId === 'month';
-
-    // If no specific budget requested and not in explicit month mode, select target budget
-    if (!targetBudget && !isExplicitMonthMode && userBudgets.length > 0) {
-      if (options.monthYear && options.monthYear !== today.format('YYYY-MM')) {
-        const targetMonthStr = options.monthYear;
-        targetBudget = userBudgets.find((b) => {
-          const fromMonth = dayjs(b.from_date).format('YYYY-MM');
-          const toMonth = dayjs(b.to_date).format('YYYY-MM');
-          return fromMonth === targetMonthStr || toMonth === targetMonthStr;
-        });
-      } else {
-        // Default to the currently active budget or the latest allocated budget
-        targetBudget = userBudgets.find((b) => isBudgetActive(b)) || userBudgets[0];
-      }
-    }
+    // Month mode is active if explicitly requested or if a month is targeted without a specific budget ID
+    const isMonthMode = options.budgetId === 'month' || Boolean(options.monthYear && !targetBudget);
 
     // Determine effective date range and income
     let startDate: string;
@@ -101,7 +137,18 @@ export class DashboardService {
     let targetMonth = options.monthYear || today.format('YYYY-MM');
     let periodLabel = '';
 
-    if (targetBudget && !isExplicitMonthMode) {
+    if (isMonthMode) {
+      // Calendar month mode (used by reports and calendar month dashboard view)
+      const startOfMonth = `${targetMonth}-01`;
+      startDate = startOfMonth;
+      endDate = dayjs(startOfMonth).endOf('month').format('YYYY-MM-DD');
+      daysInPeriod = dayjs(startOfMonth).daysInMonth() || 30;
+      periodLabel = dayjs(startOfMonth).format('MMMM YYYY');
+
+      targetBudget = DashboardService.findBudgetForMonth(userBudgets, targetMonth);
+      monthlyIncome = targetBudget ? parseFloat(targetBudget.amount as any) || 0 : 0;
+    } else if (targetBudget) {
+      // Specific budget cycle explicitly selected by ID or date range
       startDate = targetBudget.from_date;
       endDate = targetBudget.to_date;
       daysInPeriod = Math.max(1, dayjs(endDate).diff(dayjs(startDate), 'day') + 1);
@@ -109,18 +156,24 @@ export class DashboardService {
       targetMonth = dayjs(startDate).format('YYYY-MM');
       periodLabel = `${startDate} to ${endDate}`;
     } else {
-      const startOfMonth = `${targetMonth}-01`;
-      startDate = startOfMonth;
-      endDate = dayjs(startOfMonth).endOf('month').format('YYYY-MM-DD');
-      daysInPeriod = dayjs(startOfMonth).daysInMonth() || 30;
-      periodLabel = dayjs(startOfMonth).format('MMMM YYYY');
-
-      const matchingBudget = userBudgets.find((b) => {
-        const fromMonth = dayjs(b.from_date).format('YYYY-MM');
-        const toMonth = dayjs(b.to_date).format('YYYY-MM');
-        return fromMonth === targetMonth || toMonth === targetMonth;
-      });
-      monthlyIncome = matchingBudget ? parseFloat(matchingBudget.amount as any) : 0;
+      // Default: active budget or latest allocated budget
+      const activeBudget = userBudgets.find((b) => isBudgetActive(b)) || userBudgets[0];
+      if (activeBudget) {
+        targetBudget = activeBudget;
+        startDate = targetBudget.from_date;
+        endDate = targetBudget.to_date;
+        daysInPeriod = Math.max(1, dayjs(endDate).diff(dayjs(startDate), 'day') + 1);
+        monthlyIncome = parseFloat(targetBudget.amount as any) || 0;
+        targetMonth = dayjs(startDate).format('YYYY-MM');
+        periodLabel = `${startDate} to ${endDate}`;
+      } else {
+        const startOfMonth = `${targetMonth}-01`;
+        startDate = startOfMonth;
+        endDate = dayjs(startOfMonth).endOf('month').format('YYYY-MM-DD');
+        daysInPeriod = dayjs(startOfMonth).daysInMonth() || 30;
+        periodLabel = dayjs(startOfMonth).format('MMMM YYYY');
+        monthlyIncome = 0;
+      }
     }
 
     // Fetch user expenses

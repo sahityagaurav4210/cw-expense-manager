@@ -18,11 +18,13 @@ function forwardResponseHeadersAndStream(axiosResp, res) {
         'cache-control',
         'etag',
         'last-modified',
+        'cross-origin-resource-policy',
       ].includes(lowerKey)
     ) {
       res.setHeader(key, val);
     }
   }
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   res.status(axiosResp.status);
   axiosResp.data.on('error', (err) => {
     logger.error(`Stream pipe error: ${err.message}`);

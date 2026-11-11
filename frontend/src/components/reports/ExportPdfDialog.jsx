@@ -24,7 +24,7 @@ import { useExportPdfReport } from "../../hooks/useExportPdfReport";
  * Allows user to choose a target month via Autocomplete and previews the rendered template,
  * while initiating genuine PDF generation and binary download from the backend.
  */
-const ExportPdfDialog = ({ open, onClose }) => {
+const ExportPdfDialog = ({ open, onClose, initialMonth = null }) => {
   const {
     monthOptions,
     selectedOption,
@@ -33,7 +33,7 @@ const ExportPdfDialog = ({ open, onClose }) => {
     downloading,
     handleDownloadPdf,
     htmlReport,
-  } = useExportPdfReport();
+  } = useExportPdfReport(open, initialMonth);
 
   return (
     <Dialog
@@ -156,6 +156,7 @@ const ExportPdfDialog = ({ open, onClose }) => {
 ExportPdfDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  initialMonth: PropTypes.string,
 };
 
 export default React.memo(ExportPdfDialog);

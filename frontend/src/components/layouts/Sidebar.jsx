@@ -88,7 +88,7 @@ const Sidebar = ({ open, onClose, onLogout, isExpanded: controlledExpanded, expa
           const photoUrl = resolvePhotoUrl(user?.profile_photo || user?.profile_photo_url);
           return isExpanded ? (
             <Box display="flex" alignItems="center" gap={1.5} width="100%">
-              <Avatar src={photoUrl || undefined} sx={{ bgcolor: 'secondary.main', width: 36, height: 36 }}>
+              <Avatar src={photoUrl || undefined} imgProps={{ crossOrigin: 'anonymous' }} sx={{ bgcolor: 'secondary.main', width: 36, height: 36 }}>
                 {!photoUrl && <AccountCircleIcon />}
               </Avatar>
 
@@ -102,7 +102,7 @@ const Sidebar = ({ open, onClose, onLogout, isExpanded: controlledExpanded, expa
               </Box>
             </Box>
           ) : (
-            <Avatar src={photoUrl || undefined} sx={{ bgcolor: 'secondary.main', width: 36, height: 36 }}>
+            <Avatar src={photoUrl || undefined} imgProps={{ crossOrigin: 'anonymous' }} sx={{ bgcolor: 'secondary.main', width: 36, height: 36 }}>
               {!photoUrl && <AccountCircleIcon />}
             </Avatar>
           );

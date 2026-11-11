@@ -19,6 +19,7 @@ import {
   InputAdornment,
   IconButton,
   CardHeader,
+  useTheme,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -44,6 +45,7 @@ import PaymentOptionsManager from '../PaymentOptions/PaymentOptionsManager';
 import { downloadBulkExpenseTemplateApi } from '../../services/expense.service';
 import { useUI } from '../../context/UIContext';
 import useAppCss from '../../hooks/css/useAppCss';
+import useMobile from '../../hooks/core/useMobile';
 
 const AVAILABLE_TEMPLATES = [
   {
@@ -51,12 +53,12 @@ const AVAILABLE_TEMPLATES = [
     name: 'Bulk Expense Creation Template',
     fileName: 'BULK EXPENSE CREATION TEMPLATE.xlsx',
     format: 'XLSX',
-    description:
-      'Official Excel template for bulk uploading expense records (Columns: Sr. No., Expense Name [3–100 chars], Expense Amount, Expense Category, Expense Type, Expense Date).',
+    description: 'Official excel template for uploading bulk expense records.',
   },
 ];
 
 const SettingsView = () => {
+  const { isMobile } = useMobile();
   const { GlobalPaperCss } = useAppCss();
   const { showAlert } = useUI();
   const location = useLocation();
@@ -162,12 +164,6 @@ const SettingsView = () => {
                 </Typography>
               </Box>
             </Box>
-            <Chip
-              label={`${AVAILABLE_TEMPLATES.length} Template Available`}
-              color="primary"
-              size="small"
-              variant="outlined"
-            />
           </Box>
 
           <Divider sx={{ mb: 2.5 }} />
@@ -187,44 +183,60 @@ const SettingsView = () => {
                   alignItems: { xs: 'flex-start', sm: 'center' },
                   justifyContent: 'space-between',
                   gap: 2,
+                  flexWrap: 'wrap',
                 }}
               >
-                <Box display="flex" alignItems="flex-start" gap={1.5}>
-                  <ListItemIcon sx={{ minWidth: 36, mt: 0.5 }}>
-                    <TableViewIcon color="primary" />
-                  </ListItemIcon>
+                <Box display="flex" alignItems="flex-start" gap={1} flexWrap="wrap">
                   <ListItemText
                     primary={
                       <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
                         <Typography variant="subtitle1" fontWeight={700} color="text.primary">
                           {index + 1}. {tpl.name}
                         </Typography>
-                        <Chip label={tpl.fileName} size="small" color="primary" variant="outlined" />
                       </Box>
                     }
                     secondary={
-                      <Typography variant="body2" color="text.secondary" mt={0.5}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ mt: 0.5, textAlign: 'justify', textIndent: '10px' }}
+                      >
                         {tpl.description}
                       </Typography>
                     }
                   />
                 </Box>
 
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={downloadingId === tpl.id ? <CircularProgress size={16} color="inherit" /> : <DownloadIcon />}
-                  disabled={downloadingId === tpl.id}
-                  onClick={() => handleDownloadTemplate(tpl)}
-                  sx={{
-                    textTransform: 'none',
-                    fontWeight: 700,
-                    whiteSpace: 'nowrap',
-                    alignSelf: { xs: 'stretch', sm: 'center' },
-                  }}
-                >
-                  {downloadingId === tpl.id ? 'Downloading...' : 'Download Template'}
-                </Button>
+                {isMobile ? (
+                  <Box
+                    component="div"
+                    sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', width: '100%' }}
+                  >
+                    <IconButton disabled={downloadingId === tpl.id} onClick={() => handleDownloadTemplate(tpl)}>
+                      {downloadingId === tpl.id ? (
+                        <CircularProgress size={16} color="secondary" />
+                      ) : (
+                        <DownloadIcon sx={{ fontSize: 30 }} color="primary" />
+                      )}
+                    </IconButton>
+                  </Box>
+                ) : (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={downloadingId === tpl.id ? <CircularProgress size={16} color="inherit" /> : <DownloadIcon />}
+                    disabled={downloadingId === tpl.id}
+                    onClick={() => handleDownloadTemplate(tpl)}
+                    sx={{
+                      textTransform: 'none',
+                      fontWeight: 700,
+                      whiteSpace: 'nowrap',
+                      alignSelf: { xs: 'stretch', sm: 'center' },
+                    }}
+                  >
+                    {downloadingId === tpl.id ? 'Downloading...' : 'Download Template'}
+                  </Button>
+                )}
               </ListItem>
             ))}
           </List>
