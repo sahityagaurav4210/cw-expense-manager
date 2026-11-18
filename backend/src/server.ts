@@ -91,15 +91,15 @@ async function bootstrap() {
       } catch {}
     }
 
-    await sequelize.query(FileUtility.readFile('src/db/migrations/createMasterSchema.sql'));
-    await sequelize.query(FileUtility.readFile('src/db/migrations/createPublicSchema.sql'));
-    await sequelize.query(FileUtility.readFile('src/db/migrations/alterUsersTableQuery.sql')).catch(() => {});
-    await sequelize.query(FileUtility.readFile('src/db/migrations/alterExpenseTableQuery.sql')).catch(() => {});
-    await sequelize.query(FileUtility.readFile('src/db/migrations/createBudgetInflowsTableQuery.sql')).catch(() => {});
-    await sequelize.query(FileUtility.readFile('src/db/migrations/createDebtsTableQuery.sql')).catch(() => {});
-    await sequelize.query(FileUtility.readFile('src/db/migrations/createDebtsSettlementsTableQuery.sql')).catch(() => {});
-    await sequelize.query(FileUtility.readFile('src/db/migrations/createContactsTableQuery.sql')).catch(() => {});
-    await sequelize.query(FileUtility.readFile('src/db/migrations/createPaymentOptionsMasterTableQuery.sql')).catch(() => {});
+    await sequelize.query(FileUtility.readFile('sql/createMasterSchema.sql'));
+    await sequelize.query(FileUtility.readFile('sql/createPublicSchema.sql'));
+    await sequelize.query(FileUtility.readFile('sql/alterUsersTableQuery.sql')).catch(() => {});
+    await sequelize.query(FileUtility.readFile('sql/alterExpenseTableQuery.sql')).catch(() => {});
+    await sequelize.query(FileUtility.readFile('sql/createBudgetInflowsTableQuery.sql')).catch(() => {});
+    await sequelize.query(FileUtility.readFile('sql/createDebtsTableQuery.sql')).catch(() => {});
+    await sequelize.query(FileUtility.readFile('sql/createDebtsSettlementsTableQuery.sql')).catch(() => {});
+    await sequelize.query(FileUtility.readFile('sql/createContactsTableQuery.sql')).catch(() => {});
+    await sequelize.query(FileUtility.readFile('sql/createPaymentOptionsMasterTableQuery.sql')).catch(() => {});
     await sequelize.sync({ alter: false });
 
     app.listen(PORT, SERVER_HOST);
